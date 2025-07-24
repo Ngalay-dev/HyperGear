@@ -1,3 +1,4 @@
+-- faris push
 -- CA2_Submission Database Schema
 -- Create and use the CA2_Submission database
 CREATE DATABASE IF NOT EXISTS CA2_Submission;
