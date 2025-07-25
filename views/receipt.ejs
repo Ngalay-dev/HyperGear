@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Receipt</title>
+</head>
+<body>
+
+<h2 align="center">Order Receipt</h2>
+
+<table border="1" align="center" width="500" cellpadding="5" cellspacing="0">
+  <tr>
+    <td><strong>Order ID:</strong></td>
+    <td><%= order.orderId %></td>
+  </tr>
+  <tr>
+    <td><strong>Tracking Number:</strong></td>
+    <td><%= order.trackingNumber %></td>
+  </tr>
+  <tr>
+    <td><strong>Payment Method:</strong></td>
+    <td><%= order.paymentMethod %></td>
+  </tr>
+  <% if (order.paymentMethod === 'Credit/Debit Card') { %>
+  <tr>
+    <td><strong>Card Charged:</strong></td>
+    <td><%= order.cardNumber %></td>
+  </tr>
+  <% } %>
+</table>
+
+<br>
+
+<!-- ITEMS LIST -->
+<table border="1" align="center" width="500" cellpadding="5" cellspacing="0">
+  <tr>
+    <th>Item</th>
+    <th>Qty</th>
+    <th>Price</th>
+  </tr>
+  <% order.items.forEach(item => { %>
+  <tr>
+    <td><%= item.productName %></td>
+    <td align="center"><%= item.quantity %></td>
+    <td align="right">$<%= item.price %></td>
+  </tr>
+  <% }) %>
+  <tr>
+    <td colspan="2" align="right"><strong>Total Paid:</strong></td>
+    <td align="right"><strong>$<%= order.total %></strong></td>
+  </tr>
+</table>
+
+<p align="center">Your order is being processed. Use the tracking number to check delivery status.</p>
+
+<p align="center"><a href="/shopping">Back to Shop</a></p>
+
+</body>
+</html>
