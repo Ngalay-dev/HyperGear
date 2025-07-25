@@ -309,6 +309,26 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+CREATE TABLE orders (
+    orderId INT AUTO_INCREMENT PRIMARY KEY,
+    userId INT NOT NULL,
+    orderDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    totalAmount DECIMAL(10, 2) NOT NULL,
+    paymentMethod VARCHAR(20) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    FOREIGN KEY (userId) REFERENCES users(userId)
+);
+
+CREATE TABLE order_items (
+    orderItemId INT AUTO_INCREMENT PRIMARY KEY,
+    orderId INT NOT NULL,
+    productId INT NOT NULL,
+    quantity INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (orderId) REFERENCES orders(orderId),
+    FOREIGN KEY (productId) REFERENCES products(productId)
+);
+
 --
 -- Dumping data for table `users`
 --
