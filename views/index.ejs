@@ -37,7 +37,7 @@
 <ul>
   <% if (results && results.length > 0) { %>
     <% results.forEach(item => { %>
-      <li><%= products.productName %> - <%= products.price %></li>
+      <li><%= item.productName %> - <%= item.price %></li>
     <% }) %>
   <% } else { %>
     <li>No results found</li>

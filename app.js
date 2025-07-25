@@ -91,7 +91,11 @@ const validateRegistration = (req, res, next) => {
 
 // Define routes
 app.get('/',  (req, res) => {
-    res.render('index', {user: req.session.user} );
+    connection.query('SELECT * FROM products',(error, results)=>{
+        if (error) throw error;
+        res.render('index', {user: req.session.user,results: results} );
+    });
+    
 });
 
 app.get('/inventory', checkAuthenticated, checkAdmin, (req, res) => {
