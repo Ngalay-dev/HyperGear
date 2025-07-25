@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Checkout</title>
+  <script>
+    function togglePaymentFields() {
+      const method = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+      document.getElementById('creditCardFields').style.display = method === 'Credit/Debit Card' ? 'block' : 'none';
+      document.getElementById('paynowFields').style.display = method === 'PayNow' ? 'block' : 'none';
+    }
+  </script>
+</head>
+<body>
+
+<h2 align="center">Checkout</h2>
+<p align="center">Hello, <%= user.username %>. Review your items and choose a payment method.</p>
+
+<!-- CART ITEMS -->
+<table border="1" align="center" width="500" cellpadding="5" cellspacing="0">
+  <tr>
+    <th>Item</th>
+    <th>Qty</th>
+    <th>Price</th>
+  </tr>
+  <% cart.forEach(item => { %>
+  <tr>
+    <td><%= item.productName %></td>
+    <td align="center"><%= item.quantity %></td>
+    <td align="right">$<%= item.price %></td>
+  </tr>
+  <% }) %>
+  <tr>
+    <td colspan="2" align="right"><strong>Total:</strong></td>
+    <td align="right"><strong>$<%= total %></strong></td>
+  </tr>
+</table>
+
+<br>
+
+<!-- PAYMENT FORM -->
+<form action="/checkout" method="POST" align="center">
+
+  <p><strong>Payment Method:</strong></p>
+  <label><input type="radio" name="paymentMethod" value="Credit/Debit Card" onclick="togglePaymentFields()" required> Credit/Debit Card</label><br>
+  <label><input type="radio" name="paymentMethod" value="PayNow" onclick="togglePaymentFields()"> PayNow</label><br>
+  <label><input type="radio" name="paymentMethod" value="Cash on Delivery" onclick="togglePaymentFields()"> Cash on Delivery</label><br><br>
+
+  <!-- CREDIT CARD SECTION -->
+  <div id="creditCardFields" style="display:none;">
+    <p><strong>Card Details</strong></p>
+    Card Number:<br>
+    <input type="text" name="cardNumber"><br><br>
+    Expiry Date:<br>
+    <input type="text" name="expiry"><br><br>
+    CVV:<br>
+    <input type="text" name="cvv"><br><br>
+  </div>
+
+  <!-- PAYNOW SECTION -->
+  <div id="paynowFields" style="display:none;">
+    <p><strong>PayNow UEN: 123456789A</strong></p>
+    <p>Use your order ID as the payment reference.</p>
+  </div>
+
+  <button type="submit">Confirm Payment</button>
+</form>
+
+<p align="center"><a href="/cart">Back to Cart</a></p>
+
+</body>
+</html>
