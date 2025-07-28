@@ -83,6 +83,42 @@ const validateRegistration = (req, res, next) => {
 };
 
 // ROUTES
+
+const express = require('express');
+const mysql = require('mysql2');
+const app = express();
+
+// Database connection
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'parking_system'
+});
+
+// Search route
+app.get('/search', (req, res) => {
+  const searchQuery = req.query.;
+
+  // Query to find products
+app.get('/search', (req, res) => {
+    const searchQuery = req.query.productName; // get the value from ?q= in the URL
+
+    // SQL: search in your database column (e.g., vehicle_number OR name)
+    const sql = "SELECT * FROM products WHERE productName LIKE ?";
+
+    // Use wildcards for partial matches
+    connection.query(sql, [`%${searchQuery}%`], (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error retrieving data');
+        }
+
+        // Render EJS page and send results
+        res.render('index', { results: results });
+    });
+});
+
 app.get('/',  (req, res) => {
     connection.query('SELECT * FROM products',(error, results)=>{
         if (error) throw error;
