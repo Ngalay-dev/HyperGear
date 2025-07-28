@@ -126,14 +126,14 @@
     <tbody>
       <% for(let i=0; i < products.length; i++) { %>
         <tr>
-          <td><a href="/product/<%= products[i].productId %>" ><%= products[i].productName %></a></td>
+          <td><a href="/product/<%= products[i].idProducts %>" ><%= products[i].productName %></a></td>
           <td><img src="images/<%= products[i].image %>" width="20%"></td>
           <td><%= products[i].quantity %></td>
-          <td>$<%= products[i].price.toFixed(2) %></td>
+          <td>$<%= Number(products[i].price).toFixed(2) %></td>
 
           <!-- Quantity Dropdown -->
           <td>
-            <select class="form-control" onchange="document.getElementById('quantity-<%= products[i].productId %>').value = this.value">
+            <select class="form-control" onchange="document.getElementById('quantity-<%= products[i].idProducts %>').value = this.value">
               <% for (let q = 1; q <= 5; q++) { %>
                 <option value="<%= q %>"><%= q %></option>
               <% } %>
@@ -142,16 +142,16 @@
 
           <!-- Buy Button -->
           <td>
-              <form action="/add-to-cart/<%= products[i].productId %>" method="POST">
-                <input type="hidden" name="quantity" id="quantity-<%= products[i].productId %>" value="1">
+              <form action="/add-to-cart/<%= products[i].idProducts %>" method="POST">
+                <input type="hidden" name="quantity" id="quantity-<%= products[i].idProducts %>" value="1">
                 <button type="submit" class="btn btn-primary mt-3">Buy</button>
               </form>
           </td>
 
           <!-- Save Button -->
           <td>
-              <form action="/add-to-cart/<%= products[i].productId %>" method="POST">
-                <input type="hidden" name="quantity" id="quantity-<%= products[i].productId %>" value="1">
+              <form action="/add-to-cart/<%= products[i].idProducts %>" method="POST">
+                <input type="hidden" name="quantity" id="quantity-<%= products[i].idProducts %>" value="1">
                 <button type="submit" class="btn btn-primary mt-3">Save</button>
               </form>
           </td>
