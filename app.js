@@ -172,10 +172,15 @@ app.get('/category/:category', checkAuthenticated, (req, res) => {
 });
 
 app.get('/inventory', checkAuthenticated, checkAdmin, (req, res) => {
-    // Fetch data from MySQL
     connection.query('SELECT * FROM products', (error, results) => {
-      if (error) throw error;
-      res.render('inventory', { products: results, user: req.session.user });
+        if (error) {
+            console.error('Database error:', error);
+            return res.status(500).send('Database error');
+        }
+        res.render('inventory', { 
+            products: results || [],  // Ensure products is always an array
+            user: req.session.user || req.session || {} // Fallback to empty object
+        });
     });
 });
 
