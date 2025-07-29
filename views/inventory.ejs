@@ -49,7 +49,7 @@
             <td><a href="/product/<%= products[i].idProducts %>" ><%= products[i].productName %></a></td>
             <td><img src = "images/<%= products[i].image %>" width="20%"></td>
             <td><%= products[i].quantity %></td>
-            <td>$<%= products[i].price.toFixed(2) %></td>
+            <td>$<%= products[i].price ? parseFloat(products[i].price).toFixed(2) : '0.00' %></td>
             <!-- Edit Link -->
             <td><a href="/updateProduct/<%= products[i].idProducts %>">Edit</a></td>
             <!-- Delete Link -->
