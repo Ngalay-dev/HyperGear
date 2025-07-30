@@ -250,7 +250,7 @@ app.get('/cart', checkAuthenticated, (req, res) => {
 });
 
 
-// ✅ ✅ ✅ NEW ROUTES FOR PLUS/MINUS BUTTONS
+//  NEW ROUTES FOR PLUS/MINUS BUTTONS
 app.post('/cart/increase/:id', checkAuthenticated, (req, res) => {
     const productId = parseInt(req.params.id);
     if (!req.session.cart) return res.redirect('/cart');
@@ -270,7 +270,7 @@ app.post('/cart/decrease/:id', checkAuthenticated, (req, res) => {
     }
     res.redirect('/cart');
 });
-// ✅ ✅ ✅ END PLUS/MINUS
+// END PLUS/MINUS
 
 
 app.get('/logout', (req, res) => {
@@ -357,7 +357,7 @@ app.get('/deleteProduct/:id', (req, res) => {
 });
 
 
-// ✅ ✅ ✅  CHECKOUT ROUTES
+//   CHECKOUT ROUTES
 app.get('/checkout', checkAuthenticated, (req, res) => {
     const cart = req.session.cart || [];
     if (cart.length === 0) {
