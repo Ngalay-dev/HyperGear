@@ -1,7 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Checkout</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h2, p {
+      text-align: center;
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+
+    th {
+      background-color: #f9f9f9;
+      text-align: left;
+    }
+
+    .total-row {
+      font-weight: bold;
+      background-color: #f0f0f0;
+    }
+
+    form {
+      text-align: left;
+    }
+
+    .form-section {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin: 6px 0;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #555;
+    }
+
+    .payment-section {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    @media screen and (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+
+      button {
+        font-size: 14px;
+      }
+    }
+  </style>
+
   <script>
     function togglePaymentFields() {
       const method = document.querySelector('input[name="paymentMethod"]:checked')?.value;
@@ -12,60 +118,64 @@
 </head>
 <body>
 
-<h2 align="center">Checkout</h2>
-<p align="center">Hello, <%= user.username %>. Review your items and choose a payment method.</p>
+<div class="container">
+  <h2>Checkout</h2>
+  <p>Hello, <%= user.username %>. Review your items and choose a payment method.</p>
 
-<!-- CART ITEMS -->
-<table border="1" align="center" width="500" cellpadding="5" cellspacing="0">
-  <tr>
-    <th>Item</th>
-    <th>Qty</th>
-    <th>Price</th>
-  </tr>
-  <% cart.forEach(item => { %>
-  <tr>
-    <td><%= item.productName %></td>
-    <td align="center"><%= item.quantity %></td>
-    <td align="right">$<%= item.price %></td>
-  </tr>
-  <% }) %>
-  <tr>
-    <td colspan="2" align="right"><strong>Total:</strong></td>
-    <td align="right"><strong>$<%= total %></strong></td>
-  </tr>
-</table>
+  <!-- CART ITEMS -->
+  <table>
+    <tr>
+      <th>Item</th>
+      <th>Qty</th>
+      <th>Price</th>
+    </tr>
+    <% cart.forEach(item => { %>
+    <tr>
+      <td><%= item.productName %></td>
+      <td align="center"><%= item.quantity %></td>
+      <td align="right">$<%= item.price.toFixed(2) %></td>
+    </tr>
+    <% }) %>
+    <tr class="total-row">
+      <td colspan="2" align="right">Total:</td>
+      <td align="right">$<%= total.toFixed(2) %></td>
+    </tr>
+  </table>
 
-<br>
+  <!-- PAYMENT FORM -->
+  <form action="/checkout" method="POST">
+    <div class="form-section">
+      <p><strong>Payment Method:</strong></p>
+      <label><input type="radio" name="paymentMethod" value="Credit/Debit Card" onclick="togglePaymentFields()" required> Credit/Debit Card</label>
+      <label><input type="radio" name="paymentMethod" value="PayNow" onclick="togglePaymentFields()"> PayNow</label>
+      <label><input type="radio" name="paymentMethod" value="Cash on Delivery" onclick="togglePaymentFields()"> Cash on Delivery</label>
+    </div>
 
-<!-- PAYMENT FORM -->
-<form action="/checkout" method="POST" align="center">
+    <!-- CREDIT CARD SECTION -->
+    <div id="creditCardFields" class="payment-section" style="display:none;">
+      <p><strong>Card Details</strong></p>
+      <label>Card Number:
+        <input type="text" name="cardNumber" placeholder="1234 5678 9012 3456">
+      </label>
+      <label>Expiry Date:
+        <input type="text" name="expiry" placeholder="MM/YY">
+      </label>
+      <label>CVV:
+        <input type="text" name="cvv" placeholder="123">
+      </label>
+    </div>
 
-  <p><strong>Payment Method:</strong></p>
-  <label><input type="radio" name="paymentMethod" value="Credit/Debit Card" onclick="togglePaymentFields()" required> Credit/Debit Card</label><br>
-  <label><input type="radio" name="paymentMethod" value="PayNow" onclick="togglePaymentFields()"> PayNow</label><br>
-  <label><input type="radio" name="paymentMethod" value="Cash on Delivery" onclick="togglePaymentFields()"> Cash on Delivery</label><br><br>
+    <!-- PAYNOW SECTION -->
+    <div id="paynowFields" class="payment-section" style="display:none;">
+      <p><strong>PayNow UEN:</strong> 123456789A</p>
+      <p>Please use your Order ID as the payment reference.</p>
+    </div>
 
-  <!-- CREDIT CARD SECTION -->
-  <div id="creditCardFields" style="display:none;">
-    <p><strong>Card Details</strong></p>
-    Card Number:<br>
-    <input type="text" name="cardNumber"><br><br>
-    Expiry Date:<br>
-    <input type="text" name="expiry"><br><br>
-    CVV:<br>
-    <input type="text" name="cvv"><br><br>
-  </div>
+    <button type="submit">Confirm Payment</button>
+  </form>
 
-  <!-- PAYNOW SECTION -->
-  <div id="paynowFields" style="display:none;">
-    <p><strong>PayNow UEN: 123456789A</strong></p>
-    <p>Use your order ID as the payment reference.</p>
-  </div>
-
-  <button type="submit">Confirm Payment</button>
-</form>
-
-<p align="center"><a href="/cart">Back to Cart</a></p>
+  <a href="/cart" class="back-link">← Back to Cart</a>
+</div>
 
 </body>
 </html>
