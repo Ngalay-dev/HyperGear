@@ -91,7 +91,7 @@ const validateRegistration = (req, res, next) => {
 app.get('/',  (req, res) => {
     connection.query('SELECT * FROM products',(error, results)=>{
         if (error) throw error;
-        res.render('index', {products: results} );
+        res.render('shopping', {products: results} );
     });
     
 });
