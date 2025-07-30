@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <title>Edit User - HyperGear</title>
+</head>
+<body class="bg-light">
+  <%- include('partials/navbar') %>
+
+  <div class="container my-5">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="/inventory" class="text-decoration-none">
+            <i class="fas fa-home me-1"></i>Dashboard
+          </a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="/manageUsers" class="text-decoration-none">
+            <i class="fas fa-users me-1"></i>User Management
+          </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+          <i class="fas fa-edit me-1"></i>Edit User
+        </li>
+      </ol>
+    </nav>
+
+    <!-- Success/Error Messages -->
+    <% if (messages && messages.length > 0) { %>
+      <div class="row mb-4">
+        <div class="col-12">
+          <% messages.forEach(message => { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <i class="fas fa-check-circle me-2"></i><%= message %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+    
+    <% if (errors && errors.length > 0) { %>
+      <div class="row mb-4">
+        <div class="col-12">
+          <% errors.forEach(error => { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <i class="fas fa-exclamation-circle me-2"></i><%= error %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card shadow">
+          <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+              <i class="fas fa-user-edit me-2"></i>Edit User Information
+            </h4>
+          </div>
+          <div class="card-body">
+            <!-- User Info Header -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="bg-light p-3 rounded">
+                  <div class="d-flex align-items-center">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                      <i class="fas fa-user fa-2x"></i>
+                    </div>
+                    <div>
+                      <h5 class="mb-1">
+                        <%= editUser.username %>
+                        <% if (editUser.role === 'admin') { %>
+                          <span class="badge bg-warning text-dark ms-2">Admin</span>
+                        <% } else if (editUser.role === 'user') { %>
+                          <span class="badge bg-success ms-2">User</span>
+                        <% } else { %>
+                          <span class="badge bg-info ms-2">Customer</span>
+                        <% } %>
+                      </h5>
+                      <p class="text-muted mb-0">
+                        <i class="fas fa-envelope me-1"></i><%= editUser.email %>
+                      </p>
+                      <p class="text-muted mb-0">
+                        <i class="fas fa-id-card me-1"></i>User ID: #<%= editUser.userId %>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Edit Form -->
+            <form method="POST" action="/editUser/<%= editUser.userId %>">
+              <div class="row">
+                <!-- Username -->
+                <div class="col-md-6 mb-3">
+                  <label for="username" class="form-label fw-bold">
+                    <i class="fas fa-user me-1"></i>Username
+                  </label>
+                  <input type="text" 
+                         class="form-control" 
+                         id="username" 
+                         name="username" 
+                         value="<%= editUser.username %>" 
+                         required 
+                         minlength="3">
+                  <div class="form-text">Must be at least 3 characters long</div>
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6 mb-3">
+                  <label for="email" class="form-label fw-bold">
+                    <i class="fas fa-envelope me-1"></i>Email Address
+                  </label>
+                  <input type="email" 
+                         class="form-control" 
+                         id="email" 
+                         name="email" 
+                         value="<%= editUser.email %>" 
+                         required>
+                  <div class="form-text">Must be a valid email address</div>
+                </div>
+
+                <!-- Role -->
+                <div class="col-md-6 mb-3">
+                  <label for="role" class="form-label fw-bold">
+                    <i class="fas fa-user-tag me-1"></i>User Role
+                  </label>
+                  <select class="form-select" id="role" name="role" required>
+                    <option value="customer" <%= editUser.role === 'customer' ? 'selected' : '' %>>Customer</option>
+                    <option value="user" <%= editUser.role === 'user' ? 'selected' : '' %>>User</option>
+                    <option value="admin" <%= editUser.role === 'admin' ? 'selected' : '' %>>Administrator</option>
+                  </select>
+                  <div class="form-text">Choose appropriate access level</div>
+                </div>
+
+                <!-- Contact -->
+                <div class="col-md-6 mb-3">
+                  <label for="contact" class="form-label fw-bold">
+                    <i class="fas fa-phone me-1"></i>Contact Number
+                  </label>
+                  <input type="tel" 
+                         class="form-control" 
+                         id="contact" 
+                         name="contact" 
+                         value="<%= editUser.contact %>" 
+                         required 
+                         minlength="8">
+                  <div class="form-text">Must be at least 8 characters</div>
+                </div>
+
+                <!-- Address -->
+                <div class="col-12 mb-4">
+                  <label for="address" class="form-label fw-bold">
+                    <i class="fas fa-map-marker-alt me-1"></i>Address
+                  </label>
+                  <textarea class="form-control" 
+                            id="address" 
+                            name="address" 
+                            rows="3" 
+                            required><%= editUser.address %></textarea>
+                  <div class="form-text">Complete mailing address</div>
+                </div>
+              </div>
+
+              <!-- Warning for Admin Changes -->
+              <% if (editUser.role === 'admin') { %>
+                <div class="alert alert-warning">
+                  <i class="fas fa-exclamation-triangle me-2"></i>
+                  <strong>Warning:</strong> You are editing an administrator account. 
+                  Changing the role will remove admin privileges.
+                </div>
+              <% } %>
+
+              <!-- Action Buttons -->
+              <div class="d-flex justify-content-between">
+                <a href="/manageUsers" class="btn btn-secondary">
+                  <i class="fas fa-arrow-left me-2"></i>Back to User Management
+                </a>
+                
+                <div>
+                  <button type="button" class="btn btn-outline-secondary me-2" onclick="resetForm()">
+                    <i class="fas fa-undo me-2"></i>Reset
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Update User
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Reset form to original values
+    function resetForm() {
+      if (confirm('Are you sure you want to reset all changes?')) {
+        location.reload();
+      }
+    }
+
+    // Form validation
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.querySelector('form');
+      const roleSelect = document.getElementById('role');
+      const currentUserId = '<%= editUser.userId %>';
+      const sessionUserId = '<%= user.userId %>';
+      
+      // Prevent admin from changing their own role
+      if (currentUserId === sessionUserId) {
+        roleSelect.addEventListener('change', function() {
+          if (this.value !== 'admin') {
+            if (!confirm('Are you sure you want to remove your own admin privileges? You will lose access to admin features.')) {
+              this.value = 'admin';
+            }
+          }
+        });
+      }
+      
+      // Form submission confirmation
+      form.addEventListener('submit', function(e) {
+        if (!confirm('Are you sure you want to update this user\'s information?')) {
+          e.preventDefault();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
