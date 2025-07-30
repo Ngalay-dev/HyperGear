@@ -33,7 +33,7 @@ connection.connect((err) => {
 
 // Set up view engine
 app.set('view engine', 'ejs');
-//  enable static files
+// enable static files
 app.use(express.static('public'));
 // enable form processing
 app.use(express.urlencoded({
@@ -92,7 +92,6 @@ app.get('/', (req, res) => {
       console.error('Database query error:', error.message);
       return res.status(500).send('Error retrieving products');
     }
-//Pass results and user data to EJS
     res.render('shopping', { 
         products: results,
         user: req.session.user || null
@@ -104,10 +103,7 @@ app.get('/', (req, res) => {
 app.get('/category/:category/:subcategory', checkAuthenticated, (req, res) => {
     const category = req.params.category;
     let subcategory = req.params.subcategory;
-    
-    // Convert URL format back to database format
-    subcategory = subcategory.replace(/-/g, ' '); // "Casual-Shoes" → "Casual Shoes"
-    
+    subcategory = subcategory.replace(/-/g, ' '); 
     connection.query('SELECT * FROM categories', (error, allCategories) => {
         if (error) throw error;
         const categories = {};
@@ -257,8 +253,7 @@ app.get('/cart', checkAuthenticated, (req, res) => {
     res.render('cart', { cart, user: req.session.user });
 });
 
-
-//  NEW ROUTES FOR PLUS/MINUS BUTTONS
+// NEW ROUTES FOR PLUS/MINUS BUTTONS
 app.post('/cart/increase/:id', checkAuthenticated, (req, res) => {
     const productId = parseInt(req.params.id);
     if (!req.session.cart) return res.redirect('/cart');
@@ -272,14 +267,20 @@ app.post('/cart/increase/:id', checkAuthenticated, (req, res) => {
 app.post('/cart/decrease/:id', checkAuthenticated, (req, res) => {
     const productId = parseInt(req.params.id);
     if (!req.session.cart) return res.redirect('/cart');
-    const item = req.session.cart.find(p => p.idProducts === productId);
-    if (item) {
-        item.quantity = item.quantity > 1 ? item.quantity - 1 : 1;
+
+    const index = req.session.cart.findIndex(p => p.idProducts === productId);
+
+    if (index !== -1) {
+        if (req.session.cart[index].quantity > 1) {
+            req.session.cart[index].quantity -= 1;
+        } else {
+            // remove item if quantity is 1
+            req.session.cart.splice(index, 1);
+        }
     }
     res.redirect('/cart');
 });
 // END PLUS/MINUS
-
 
 app.get('/logout', (req, res) => {
     req.session.destroy();
@@ -364,8 +365,7 @@ app.get('/deleteProduct/:id', (req, res) => {
     });
 });
 
-
-//   CHECKOUT ROUTES
+// CHECKOUT ROUTES
 app.get('/checkout', checkAuthenticated, (req, res) => {
     const cart = req.session.cart || [];
     if (cart.length === 0) {
@@ -414,3 +414,4 @@ app.get('/receipt', checkAuthenticated, (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
