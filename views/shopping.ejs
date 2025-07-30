@@ -153,7 +153,7 @@
               <h5 class="card-title"><a href="/product/<%= product.idProducts %>" class="text-decoration-none"><%= product.productName %></a></h5>
               <span class="category-badge">Hot</span>
             </div>
-            <p class="card-text"><strong>Branch:</strong> <%= product.quantity %></p>
+          
             <p class="card-text"><strong>Price:</strong> $<%= Number(product.price).toFixed(2) %></p>
             <form action="/add-to-cart/<%= product.idProducts %>" method="POST">
               <div class="mb-2">
