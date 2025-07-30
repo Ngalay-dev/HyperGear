@@ -24,7 +24,7 @@
               <% categories[main].forEach(sub => { %>
                 <li>
                   <a class="dropdown-item" href="/category/<%= main %>/<%= sub.name %>">
-                    <i class="fas fa-angle-right text-primary me-2"></i><%= sub.name %>
+                    <%= sub.name %>
                   </a>
                 </li>
               <% }) %>

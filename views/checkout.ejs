@@ -1,371 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <title>Checkout - HyperGear</title>
-</head>
-<body class="bg-light">
-  <%- include('partials/navbar') %>
-
-  <div class="container-fluid my-4">
-    <!-- Checkout Header -->
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="bg-success text-white p-4 rounded">
-          <div class="row align-items-center">
-            <div class="col-md-8">
-              <h2 class="mb-1">
-                <i class="fas fa-credit-card me-2"></i>Secure Checkout
-              </h2>
-              <p class="mb-0 opacity-75">
-                Complete your order securely and safely
-              </p>
-            </div>
-            <div class="col-md-4 text-end">
-              <a href="/cart" class="btn btn-light btn-lg">
-                <i class="fas fa-arrow-left me-2"></i>Back to Cart
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Flash Messages -->
-    <% if (messages.error && messages.error.length > 0) { %>
-      <div class="row mb-3">
-        <div class="col-12">
-          <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i><%= messages.error[0] %>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-        </div>
-      </div>
-    <% } %>
-
-    <form action="/checkout" method="POST" id="checkoutForm">
-      <div class="row">
-        <!-- Order Summary -->
-        <div class="col-lg-5 mb-4">
-          <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-              <h4 class="mb-0">
-                <i class="fas fa-receipt me-2"></i>Order Summary
-              </h4>
-            </div>
-            <div class="card-body p-0">
-              <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                  <thead class="table-light">
-                    <tr>
-                      <th class="px-3">Product</th>
-                      <th class="text-center">Qty</th>
-                      <th class="text-center">Price</th>
-                      <th class="text-center">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <% cart.forEach(item => { %>
-                      <% const itemTotal = Number(item.price) * item.quantity; %>
-                      <tr>
-                        <td class="px-3 align-middle">
-                          <div class="d-flex align-items-center">
-                            <% if (item.image) { %>
-                              <img src="/images/<%= item.image %>" 
-                                   class="rounded me-3" 
-                                   style="width: 50px; height: 50px; object-fit: cover;"
-                                   alt="<%= item.productName %>">
-                            <% } else { %>
-                              <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                <i class="fas fa-image text-muted"></i>
-                              </div>
-                            <% } %>
-                            <div>
-                              <strong><%= item.productName %></strong>
-                              <br>
-                              <small class="text-muted">ID: #<%= item.idProducts %></small>
-                            </div>
-                          </div>
-                        </td>
-                        <td class="text-center align-middle">
-                          <span class="badge bg-info"><%= item.quantity %></span>
-                        </td>
-                        <td class="text-center align-middle">
-                          <span class="text-success fw-bold">$<%= Number(item.price).toFixed(2) %></span>
-                        </td>
-                        <td class="text-center align-middle">
-                          <span class="text-primary fw-bold">$<%= itemTotal.toFixed(2) %></span>
-                        </td>
-                      </tr>
-                    <% }) %>
-                  </tbody>
-                  <tfoot class="table-dark">
-                    <tr>
-                      <td colspan="3" class="px-3 fw-bold">
-                        <i class="fas fa-calculator me-2"></i>Grand Total:
-                      </td>
-                      <td class="text-center fw-bold fs-5">
-                        $<%= total %>
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Checkout Form -->
-        <div class="col-lg-7">
-          <div class="card shadow-sm">
-            <div class="card-header bg-info text-white">
-              <h4 class="mb-0">
-                <i class="fas fa-form me-2"></i>Checkout Details
-              </h4>
-            </div>
-            <div class="card-body">
-              <!-- Delivery Information -->
-              <div class="mb-4">
-                <h5 class="text-primary mb-3">
-                  <i class="fas fa-truck me-2"></i>Delivery Information
-                </h5>
-                <div class="row">
-                  <div class="col-12 mb-3">
-                    <label for="deliveryAddress" class="form-label fw-bold">
-                      <i class="fas fa-map-marker-alt me-1"></i>Delivery Address *
-                    </label>
-                    <textarea class="form-control" id="deliveryAddress" name="deliveryAddress" rows="3" 
-                              placeholder="Enter your complete delivery address" required><%= user.address || '' %></textarea>
-                    <div class="form-text">Please provide a complete address including postal code</div>
-                  </div>
-                  <div class="col-12 mb-3">
-                    <label for="deliveryNotes" class="form-label fw-bold">
-                      <i class="fas fa-sticky-note me-1"></i>Delivery Notes (Optional)
-                    </label>
-                    <textarea class="form-control" id="deliveryNotes" name="deliveryNotes" rows="2" 
-                              placeholder="Special delivery instructions (e.g., leave at door, call upon arrival)"></textarea>
-                  </div>
-                </div>
-              </div>
-
-              <hr>
-
-              <!-- Payment Method -->
-              <div class="mb-4">
-                <h5 class="text-primary mb-3">
-                  <i class="fas fa-credit-card me-2"></i>Payment Method
-                </h5>
-                <div class="row">
-                  <div class="col-12">
-                    <div class="form-check mb-3 p-3 border rounded">
-                      <input class="form-check-input" type="radio" name="paymentMethod" id="creditCard" 
-                             value="Credit/Debit Card" onclick="togglePaymentFields()" required>
-                      <label class="form-check-label fw-bold" for="creditCard">
-                        <i class="fas fa-credit-card me-2 text-primary"></i>Credit/Debit Card
-                      </label>
-                      <div class="form-text">Secure payment with Visa, MasterCard, or American Express</div>
-                    </div>
-                    <div class="form-check mb-3 p-3 border rounded">
-                      <input class="form-check-input" type="radio" name="paymentMethod" id="paynow" 
-                             value="PayNow" onclick="togglePaymentFields()">
-                      <label class="form-check-label fw-bold" for="paynow">
-                        <i class="fas fa-mobile-alt me-2 text-success"></i>PayNow
-                      </label>
-                      <div class="form-text">Instant bank transfer via PayNow QR code</div>
-                    </div>
-                    <div class="form-check mb-3 p-3 border rounded">
-                      <input class="form-check-input" type="radio" name="paymentMethod" id="cod" 
-                             value="Cash on Delivery" onclick="togglePaymentFields()">
-                      <label class="form-check-label fw-bold" for="cod">
-                        <i class="fas fa-money-bill-wave me-2 text-warning"></i>Cash on Delivery
-                      </label>
-                      <div class="form-text">Pay in cash when your order is delivered</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Credit Card Fields -->
-              <div id="creditCardFields" style="display:none;" class="mb-4">
-                <div class="card bg-light">
-                  <div class="card-body">
-                    <h6 class="card-title text-primary">
-                      <i class="fas fa-lock me-2"></i>Secure Card Payment
-                    </h6>
-                    <div class="row">
-                      <div class="col-12 mb-3">
-                        <label for="cardNumber" class="form-label fw-bold">Card Number *</label>
-                        <input type="text" class="form-control" id="cardNumber" name="cardNumber" 
-                               placeholder="1234 5678 9012 3456" maxlength="19">
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <label for="expiry" class="form-label fw-bold">Expiry Date *</label>
-                        <input type="text" class="form-control" id="expiry" name="expiry" 
-                               placeholder="MM/YY" maxlength="5">
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <label for="cvv" class="form-label fw-bold">CVV *</label>
-                        <input type="text" class="form-control" id="cvv" name="cvv" 
-                               placeholder="123" maxlength="4">
-                      </div>
-                    </div>
-                    <div class="alert alert-info mb-0">
-                      <i class="fas fa-shield-alt me-2"></i>
-                      Your payment information is encrypted and secure
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- PayNow Fields -->
-              <div id="paynowFields" style="display:none;" class="mb-4">
-                <div class="card bg-light">
-                  <div class="card-body text-center">
-                    <h6 class="card-title text-success">
-                      <i class="fas fa-qrcode me-2"></i>PayNow Payment
-                    </h6>
-                    <div class="alert alert-success">
-                      <h5><strong>PayNow UEN: 123456789A</strong></h5>
-                      <p class="mb-0">Use your order ID as the payment reference after placing the order</p>
-                    </div>
-                    <small class="text-muted">
-                      <i class="fas fa-info-circle me-1"></i>
-                      You will receive payment instructions after order confirmation
-                    </small>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Order Total Display -->
-              <div class="bg-success text-white p-3 rounded mb-4">
-                <div class="row align-items-center">
-                  <div class="col-6">
-                    <h5 class="mb-0">
-                      <i class="fas fa-shopping-cart me-2"></i>Order Total:
-                    </h5>
-                  </div>
-                  <div class="col-6 text-end">
-                    <h3 class="mb-0">$<%= total %></h3>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Submit Button -->
-              <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
-                  <i class="fas fa-lock me-2"></i>Complete Secure Order
-                </button>
-                <a href="/cart" class="btn btn-outline-secondary">
-                  <i class="fas fa-arrow-left me-2"></i>Return to Cart
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </form>
-  </div>
-
+  <title>Checkout</title>
   <script>
     function togglePaymentFields() {
       const method = document.querySelector('input[name="paymentMethod"]:checked')?.value;
-      const creditCardFields = document.getElementById('creditCardFields');
-      const paynowFields = document.getElementById('paynowFields');
-      const submitBtn = document.getElementById('submitBtn');
-      
-      // Hide all payment fields
-      creditCardFields.style.display = 'none';
-      paynowFields.style.display = 'none';
-      
-      // Show relevant fields and update button text
-      if (method === 'Credit/Debit Card') {
-        creditCardFields.style.display = 'block';
-        submitBtn.innerHTML = '<i class="fas fa-credit-card me-2"></i>Process Card Payment';
-        
-        // Make card fields required
-        document.getElementById('cardNumber').required = true;
-        document.getElementById('expiry').required = true;
-        document.getElementById('cvv').required = true;
-      } else {
-        // Remove required from card fields
-        document.getElementById('cardNumber').required = false;
-        document.getElementById('expiry').required = false;
-        document.getElementById('cvv').required = false;
-        
-        if (method === 'PayNow') {
-          paynowFields.style.display = 'block';
-          submitBtn.innerHTML = '<i class="fas fa-mobile-alt me-2"></i>Proceed with PayNow';
-        } else if (method === 'Cash on Delivery') {
-          submitBtn.innerHTML = '<i class="fas fa-money-bill-wave me-2"></i>Place COD Order';
-        }
-      }
+      document.getElementById('creditCardFields').style.display = method === 'Credit/Debit Card' ? 'block' : 'none';
+      document.getElementById('paynowFields').style.display = method === 'PayNow' ? 'block' : 'none';
     }
-
-    // Format card number input
-    document.getElementById('cardNumber').addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
-      let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-      if (formattedValue.length > 19) formattedValue = formattedValue.substring(0, 19);
-      e.target.value = formattedValue;
-    });
-
-    // Format expiry date input
-    document.getElementById('expiry').addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length >= 2) {
-        value = value.substring(0, 2) + '/' + value.substring(2, 4);
-      }
-      e.target.value = value;
-    });
-
-    // Format CVV input (numbers only)
-    document.getElementById('cvv').addEventListener('input', function(e) {
-      e.target.value = e.target.value.replace(/[^0-9]/g, '');
-    });
-
-    // Form validation
-    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
-      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
-      
-      if (!paymentMethod) {
-        e.preventDefault();
-        alert('Please select a payment method');
-        return;
-      }
-      
-      if (paymentMethod.value === 'Credit/Debit Card') {
-        const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
-        const expiry = document.getElementById('expiry').value;
-        const cvv = document.getElementById('cvv').value;
-        
-        if (cardNumber.length < 13 || cardNumber.length > 19) {
-          e.preventDefault();
-          alert('Please enter a valid card number');
-          return;
-        }
-        
-        if (!/^\d{2}\/\d{2}$/.test(expiry)) {
-          e.preventDefault();
-          alert('Please enter a valid expiry date (MM/YY)');
-          return;
-        }
-        
-        if (cvv.length < 3 || cvv.length > 4) {
-          e.preventDefault();
-          alert('Please enter a valid CVV');
-          return;
-        }
-      }
-      
-      // Show loading state
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-    });
   </script>
+</head>
+<body>
+
+<h2 align="center">Checkout</h2>
+<p align="center">Hello, <%= user.username %>. Review your items and choose a payment method.</p>
+
+<!-- CART ITEMS -->
+<table border="1" align="center" width="500" cellpadding="5" cellspacing="0">
+  <tr>
+    <th>Item</th>
+    <th>Qty</th>
+    <th>Price</th>
+  </tr>
+  <% cart.forEach(item => { %>
+  <tr>
+    <td><%= item.productName %></td>
+    <td align="center"><%= item.quantity %></td>
+    <td align="right">$<%= item.price %></td>
+  </tr>
+  <% }) %>
+  <tr>
+    <td colspan="2" align="right"><strong>Total:</strong></td>
+    <td align="right"><strong>$<%= total %></strong></td>
+  </tr>
+</table>
+
+<br>
+
+<!-- PAYMENT FORM -->
+<form action="/checkout" method="POST" align="center">
+
+  <p><strong>Payment Method:</strong></p>
+  <label><input type="radio" name="paymentMethod" value="Credit/Debit Card" onclick="togglePaymentFields()" required> Credit/Debit Card</label><br>
+  <label><input type="radio" name="paymentMethod" value="PayNow" onclick="togglePaymentFields()"> PayNow</label><br>
+  <label><input type="radio" name="paymentMethod" value="Cash on Delivery" onclick="togglePaymentFields()"> Cash on Delivery</label><br><br>
+
+  <!-- CREDIT CARD SECTION -->
+  <div id="creditCardFields" style="display:none;">
+    <p><strong>Card Details</strong></p>
+    Card Number:<br>
+    <input type="text" name="cardNumber"><br><br>
+    Expiry Date:<br>
+    <input type="text" name="expiry"><br><br>
+    CVV:<br>
+    <input type="text" name="cvv"><br><br>
+  </div>
+
+  <!-- PAYNOW SECTION -->
+  <div id="paynowFields" style="display:none;">
+    <p><strong>PayNow UEN: 123456789A</strong></p>
+    <p>Use your order ID as the payment reference.</p>
+  </div>
+
+  <button type="submit">Confirm Payment</button>
+</form>
+
+<p align="center"><a href="/cart">Back to Cart</a></p>
+
 </body>
 </html>

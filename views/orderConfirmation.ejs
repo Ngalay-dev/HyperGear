@@ -1,0 +1,72 @@
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h2>Order Confirmation</h2>
+        </div>
+        <div class="card-body">
+            <h4>Thank you for your order!</h4>
+            <p>Your order #<%= order.orderId %> has been received.</p>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h5>Order Details</h5>
+                    <p><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleString() %></p>
+                    <p><strong>Payment Method:</strong> 
+                        <%= order.paymentMethod === 'cash' ? 'Cash on Delivery' : 
+                           order.paymentMethod === 'card' ? 'Credit/Debit Card' : 
+                           'PayNow' %>
+                    </p>
+                    <p><strong>Status:</strong> <%= order.status %></p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Shipping To</h5>
+                    <p><%= user.username %></p>
+                    <p><%= user.address %></p>
+                    <p>Contact: <%= user.contact %></p>
+                </div>
+            </div>
+            
+            <h5 class="mt-4">Items Ordered</h5>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% items.forEach(item => { %>
+                        <tr>
+                            <td><%= item.productName %></td>
+                            <td>$<%= item.price.toFixed(2) %></td>
+                            <td><%= item.quantity %></td>
+                            <td>$<%= (item.price * item.quantity).toFixed(2) %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="3">Total</th>
+                        <th>$<%= order.totalAmount.toFixed(2) %></th>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <% if (order.paymentMethod === 'paynow') { %>
+                <div class="alert alert-info mt-3">
+                    <h5>PayNow Instructions</h5>
+                    <p>Please make payment to our PayNow UEN: 123456789A</p>
+                    <p>Use Order #<%= order.orderId %> as reference</p>
+                </div>
+            <% } %>
+            
+            <div class="text-center mt-4">
+                <a href="/shopping" class="btn btn-primary">Continue Shopping</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('footer') %>
