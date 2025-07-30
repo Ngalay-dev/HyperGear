@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <title>Profile - HyperGear</title>
+</head>
+<body class="bg-light">
+  <%- include('partials/navbar') %>
+
+  <div class="container my-5">
+    <!-- Success/Error Messages -->
+    <% if (messages && messages.length > 0) { %>
+      <div class="row mb-4">
+        <div class="col-12">
+          <% messages.forEach(message => { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <i class="fas fa-check-circle me-2"></i><%= message %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+    
+    <% if (errors && errors.length > 0) { %>
+      <div class="row mb-4">
+        <div class="col-12">
+          <% errors.forEach(error => { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <i class="fas fa-exclamation-circle me-2"></i><%= error %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <!-- Profile Header -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+              <i class="fas fa-user-circle me-2"></i>My Profile
+            </h4>
+          </div>
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-3 text-center">
+                <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                  <i class="fas fa-user text-white" style="font-size: 3rem;"></i>
+                </div>
+              </div>
+              <div class="col-md-9">
+                <h3 class="mb-1"><%= user.username %></h3>
+                <p class="text-muted mb-2"><%= user.email %></p>
+                <div class="mb-2">
+                  <% if (user.role === 'admin') { %>
+                    <span class="badge bg-warning text-dark">
+                      <i class="fas fa-user-cog me-1"></i>Administrator
+                    </span>
+                  <% } else if (user.role === 'user') { %>
+                    <span class="badge bg-success">
+                      <i class="fas fa-user me-1"></i>User
+                    </span>
+                  <% } else { %>
+                    <span class="badge bg-info">
+                      <i class="fas fa-user me-1"></i>Customer
+                    </span>
+                  <% } %>
+                </div>
+                <small class="text-muted">User ID: #<%= user.userId %></small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Edit Form -->
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-edit me-2"></i>Edit Profile Information
+            </h5>
+          </div>
+          <div class="card-body">
+            <form method="POST" action="/profile">
+              <div class="row">
+                <!-- Username -->
+                <div class="col-md-6 mb-3">
+                  <label for="username" class="form-label">
+                    <i class="fas fa-user me-1"></i>Username
+                  </label>
+                  <input type="text" 
+                         class="form-control" 
+                         id="username" 
+                         name="username" 
+                         value="<%= user.username %>"
+                         required>
+                  <div class="form-text">
+                    Choose a unique username for your account.
+                  </div>
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6 mb-3">
+                  <label for="email" class="form-label">
+                    <i class="fas fa-envelope me-1"></i>Email Address
+                  </label>
+                  <input type="email" 
+                         class="form-control" 
+                         id="email" 
+                         name="email" 
+                         value="<%= user.email %>"
+                         readonly
+                         disabled>
+                  <div class="form-text">
+                    <i class="fas fa-lock me-1"></i>Email address cannot be changed for security reasons.
+                  </div>
+                </div>
+
+                <!-- Contact -->
+                <div class="col-md-6 mb-3">
+                  <label for="contact" class="form-label">
+                    <i class="fas fa-phone me-1"></i>Contact Number
+                  </label>
+                  <input type="tel" 
+                         class="form-control" 
+                         id="contact" 
+                         name="contact" 
+                         value="<%= user.contact %>"
+                         required>
+                  <div class="form-text">
+                    Your primary contact number.
+                  </div>
+                </div>
+
+                <!-- Address -->
+                <div class="col-md-6 mb-3">
+                  <label for="address" class="form-label">
+                    <i class="fas fa-map-marker-alt me-1"></i>Address
+                  </label>
+                  <textarea class="form-control" 
+                            id="address" 
+                            name="address" 
+                            rows="3" 
+                            required><%= user.address %></textarea>
+                  <div class="form-text">
+                    Your current residential address.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="d-flex justify-content-between">
+                <div>
+                  <% if (user.role === 'admin') { %>
+                    <a href="/inventory" class="btn btn-outline-secondary">
+                      <i class="fas fa-arrow-left me-2"></i>Back to Inventory
+                    </a>
+                  <% } else { %>
+                    <a href="/shopping" class="btn btn-outline-secondary">
+                      <i class="fas fa-arrow-left me-2"></i>Back to Shopping
+                    </a>
+                  <% } %>
+                </div>
+                <div>
+                  <button type="button" class="btn btn-outline-danger me-2" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                    <i class="fas fa-key me-2"></i>Change Password
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Update Profile
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-key me-2"></i>Change Password
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form method="POST" action="/change-password">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="currentPassword" class="form-label">Current Password</label>
+              <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+            </div>
+            <div class="mb-3">
+              <label for="newPassword" class="form-label">New Password</label>
+              <input type="password" class="form-control" id="newPassword" name="newPassword" required minlength="6">
+              <div class="form-text">Password must be at least 6 characters long.</div>
+            </div>
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label">Confirm New Password</label>
+              <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+            </div>
+            <div class="alert alert-warning">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              Make sure to use a strong password with a mix of letters, numbers, and symbols.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger">
+              <i class="fas fa-key me-2"></i>Change Password
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript for form validation -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Password confirmation validation
+      const newPassword = document.getElementById('newPassword');
+      const confirmPassword = document.getElementById('confirmPassword');
+      
+      function validatePasswords() {
+        if (newPassword.value !== confirmPassword.value) {
+          confirmPassword.setCustomValidity('Passwords do not match');
+        } else {
+          confirmPassword.setCustomValidity('');
+        }
+      }
+      
+      if (newPassword && confirmPassword) {
+        newPassword.addEventListener('input', validatePasswords);
+        confirmPassword.addEventListener('input', validatePasswords);
+      }
+    });
+  </script>
+</body>
+</html>

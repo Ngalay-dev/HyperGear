@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <title>User Management - HyperGear</title>
+</head>
+<body class="bg-light">
+    <%- include('partials/navbar') %>
+
+  <div class="container-fluid my-4">
+    <!-- Success/Error Messages -->
+    <% if (messages && messages.length > 0) { %>
+      <div class="row mb-4">
+        <div class="col-12">
+          <% messages.forEach(message => { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <i class="fas fa-check-circle me-2"></i><%= message %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+    
+    <% if (errors && errors.length > 0) { %>
+      <div class="row mb-4">
+        <div class="col-12">
+          <% errors.forEach(error => { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <i class="fas fa-exclamation-circle me-2"></i><%= error %>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Header Section -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h1 class="display-6 fw-bold text-primary">
+              <i class="fas fa-users me-2"></i>User Management
+            </h1>
+            <p class="text-muted mb-0">
+              Manage system users and permissions
+              <span class="badge bg-primary ms-2">Admin Panel</span>
+            </p>
+          </div>
+          <div>
+            <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#addUserModal">
+              <i class="fas fa-user-plus me-2"></i>Add New User
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <form method="GET" action="/manageUsers" class="mb-3">
+              <div class="row g-3">
+                <!-- Search Input -->
+                <div class="col-md-4">
+                  <div class="input-group">
+                    <span class="input-group-text">
+                      <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" 
+                           class="form-control" 
+                           name="search" 
+                           value="<%= searchTerm %>"
+                           placeholder="Search users...">
+                  </div>
+                </div>
+                
+                <!-- Role Filter -->
+                <div class="col-md-3">
+                  <select class="form-select" name="role">
+                    <option value="all" <%= roleFilter === 'all' ? 'selected' : '' %>>All Roles</option>
+                    <option value="user" <%= roleFilter === 'user' ? 'selected' : '' %>>Users</option>
+                    <option value="customer" <%= roleFilter === 'customer' ? 'selected' : '' %>>Customers</option>
+                    <option value="admin" <%= roleFilter === 'admin' ? 'selected' : '' %>>Administrators</option>
+                  </select>
+                </div>
+                
+                <!-- Sort Options -->
+                <div class="col-md-2">
+                  <select class="form-select" name="sort">
+                    <option value="username" <%= sortBy === 'username' ? 'selected' : '' %>>Username</option>
+                    <option value="email" <%= sortBy === 'email' ? 'selected' : '' %>>Email</option>
+                    <option value="role" <%= sortBy === 'role' ? 'selected' : '' %>>Role</option>
+                    <option value="userId" <%= sortBy === 'userId' ? 'selected' : '' %>>User ID</option>
+                  </select>
+                </div>
+                
+                <!-- Sort Order -->
+                <div class="col-md-2">
+                  <select class="form-select" name="order">
+                    <option value="ASC" <%= sortOrder === 'ASC' ? 'selected' : '' %>>↑ Ascending</option>
+                    <option value="DESC" <%= sortOrder === 'DESC' ? 'selected' : '' %>>↓ Descending</option>
+                  </select>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="col-md-1">
+                  <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter"></i>
+                  </button>
+                </div>
+              </div>
+            </form>
+            
+            <!-- Quick Filter Buttons -->
+            <div class="d-flex flex-wrap gap-2">
+              <a href="/manageUsers" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-refresh me-1"></i>All
+              </a>
+              <a href="/manageUsers?role=user" class="btn btn-outline-success btn-sm">
+                <i class="fas fa-user me-1"></i>Users Only
+              </a>
+              <a href="/manageUsers?role=customer" class="btn btn-outline-info btn-sm">
+                <i class="fas fa-user me-1"></i>Customers Only
+              </a>
+              <a href="/manageUsers?role=admin" class="btn btn-outline-warning btn-sm">
+                <i class="fas fa-user-cog me-1"></i>Admins Only
+              </a>
+            </div>
+            
+            <!-- Current Filters Display -->
+            <% if (searchTerm || roleFilter !== 'all') { %>
+              <div class="mt-3 pt-3 border-top">
+                <small class="text-muted">Active filters:</small>
+                <% if (searchTerm) { %>
+                  <span class="badge bg-info ms-2">
+                    Search: "<%= searchTerm %>"
+                    <a href="/manageUsers?role=<%= roleFilter %>" class="text-white ms-1">×</a>
+                  </span>
+                <% } %>
+                <% if (roleFilter !== 'all') { %>
+                  <span class="badge bg-secondary ms-2">
+                    Role: <%= roleFilter %>
+                    <a href="/manageUsers?search=<%= searchTerm %>" class="text-white ms-1">×</a>
+                  </span>
+                <% } %>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-white">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-list me-2"></i>System Users
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0" id="usersTable">
+                <thead class="table-dark">
+                  <tr>
+                    <th class="px-3">
+                      <a href="/manageUsers?search=<%= searchTerm %>&role=<%= roleFilter %>&sort=username&order=<%= sortBy === 'username' && sortOrder === 'ASC' ? 'DESC' : 'ASC' %>" 
+                         class="text-white text-decoration-none">
+                        <i class="fas fa-user me-1"></i>Username
+                        <% if (sortBy === 'username') { %>
+                          <i class="fas fa-sort-<%= sortOrder === 'ASC' ? 'up' : 'down' %> ms-1"></i>
+                        <% } %>
+                      </a>
+                    </th>
+                    <th>
+                      <a href="/manageUsers?search=<%= searchTerm %>&role=<%= roleFilter %>&sort=email&order=<%= sortBy === 'email' && sortOrder === 'ASC' ? 'DESC' : 'ASC' %>" 
+                         class="text-white text-decoration-none">
+                        <i class="fas fa-envelope me-1"></i>Email
+                        <% if (sortBy === 'email') { %>
+                          <i class="fas fa-sort-<%= sortOrder === 'ASC' ? 'up' : 'down' %> ms-1"></i>
+                        <% } %>
+                      </a>
+                    </th>
+                    <th class="text-center">
+                      <a href="/manageUsers?search=<%= searchTerm %>&role=<%= roleFilter %>&sort=role&order=<%= sortBy === 'role' && sortOrder === 'ASC' ? 'DESC' : 'ASC' %>" 
+                         class="text-white text-decoration-none">
+                        <i class="fas fa-shield-alt me-1"></i>Role
+                        <% if (sortBy === 'role') { %>
+                          <i class="fas fa-sort-<%= sortOrder === 'ASC' ? 'up' : 'down' %> ms-1"></i>
+                        <% } %>
+                      </a>
+                    </th>
+                    <th class="text-center">
+                      <i class="fas fa-info-circle me-1"></i>Contact
+                    </th>
+                    <th class="text-center">
+                      <a href="/manageUsers?search=<%= searchTerm %>&role=<%= roleFilter %>&sort=userId&order=<%= sortBy === 'userId' && sortOrder === 'ASC' ? 'DESC' : 'ASC' %>" 
+                         class="text-white text-decoration-none">
+                        <i class="fas fa-id-badge me-1"></i>User ID
+                        <% if (sortBy === 'userId') { %>
+                          <i class="fas fa-sort-<%= sortOrder === 'ASC' ? 'up' : 'down' %> ms-1"></i>
+                        <% } %>
+                      </a>
+                    </th>
+                    <th class="text-center">
+                      <i class="fas fa-cogs me-1"></i>Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% for(let i=0; i < users.length; i++) { %>
+                    <tr class="user-row">
+                      <!-- Username -->
+                      <td class="px-3 align-middle">
+                        <div class="d-flex align-items-center">
+                          <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                            <i class="fas fa-user text-white"></i>
+                          </div>
+                          <div>
+                            <span class="fw-semibold"><%= users[i].username %></span>
+                            <br>
+                            <small class="text-muted">ID: #<%= users[i].userId %></small>
+                          </div>
+                        </div>
+                      </td>
+                      
+                      <!-- Email -->
+                      <td class="align-middle">
+                        <span class="fw-normal"><%= users[i].email %></span>
+                      </td>
+                      
+                      <!-- Role Badge -->
+                      <td class="text-center align-middle">
+                        <% if (users[i].role === 'admin') { %>
+                          <span class="badge bg-warning text-dark">
+                            <i class="fas fa-user-cog me-1"></i>Administrator
+                          </span>
+                        <% } else if (users[i].role === 'user') { %>
+                          <span class="badge bg-success">
+                            <i class="fas fa-user me-1"></i>User
+                          </span>
+                        <% } else { %>
+                          <span class="badge bg-info">
+                            <i class="fas fa-user me-1"></i>Customer
+                          </span>
+                        <% } %>
+                      </td>
+                      
+                      <!-- Contact Info -->
+                      <td class="text-center align-middle">
+                        <% if (users[i].contact) { %>
+                          <span class="text-muted"><%= users[i].contact %></span>
+                          <br>
+                          <small class="text-muted"><%= users[i].address || 'No address' %></small>
+                        <% } else { %>
+                          <span class="text-muted">No contact info</span>
+                        <% } %>
+                      </td>
+                      
+                      <!-- User ID -->
+                      <td class="text-center align-middle">
+                        <span class="fw-normal font-monospace">#<%= users[i].userId %></span>
+                      </td>
+                      
+                      <!-- Actions -->
+                      <td class="text-center align-middle order-actions">
+                        <div class="btn-group" role="group">
+                          <!-- Edit User Button -->
+                          <a href="/editUser/<%= users[i].userId %>" 
+                             class="btn btn-outline-primary btn-sm" 
+                             data-bs-toggle="tooltip" 
+                             title="Edit User">
+                            <i class="fas fa-edit"></i>
+                          </a>
+                          
+                          <!-- Change Role Button -->
+                          <button class="btn btn-outline-warning btn-sm" 
+                                  data-bs-toggle="modal" 
+                                  data-bs-target="#changeRoleModal"
+                                  data-bs-toggle="tooltip" 
+                                  title="Change Role"
+                                  onclick="setRoleChange('<%= users[i].userId %>', '<%= users[i].username %>', '<%= users[i].role %>')">
+                            <i class="fas fa-user-tag"></i>
+                          </button>
+                          
+                          <!-- Delete User Button -->
+                          <button class="btn btn-outline-danger btn-sm" 
+                                  data-bs-toggle="modal" 
+                                  data-bs-target="#deleteUserModal"
+                                  data-bs-toggle="tooltip" 
+                                  title="Delete User"
+                                  onclick="setDeleteUser('<%= users[i].userId %>', '<%= users[i].username %>')">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+            
+            <% if (users.length === 0) { %>
+              <!-- Empty State -->
+              <div class="text-center py-5">
+                <i class="fas fa-users text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-3 text-muted">No Users Found</h4>
+                <p class="text-muted">No users match your current search criteria.</p>
+                <a href="/manageUsers" class="btn btn-primary">
+                  <i class="fas fa-refresh me-2"></i>Reset Filters
+                </a>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Role Modal -->
+  <div class="modal fade" id="changeRoleModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-exchange-alt me-2"></i>Change User Role
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form method="POST" action="/updateUserRole">
+          <div class="modal-body">
+            <div class="alert alert-info">
+              <strong>User:</strong> <span id="roleUsername"></span><br>
+              <strong>Current Role:</strong> <span id="currentRole" class="badge bg-secondary"></span>
+            </div>
+            <input type="hidden" id="roleUserId" name="userId">
+            <div class="mb-3">
+              <label class="form-label">Select New Role:</label>
+              <select class="form-select" name="newRole" id="newRoleSelect" required>
+                <option value="">-- Select Role --</option>
+                <option value="customer">Customer - Basic access to shopping features</option>
+                <option value="user">User - Enhanced shopping privileges</option>
+                <option value="admin">Administrator - Full system access</option>
+              </select>
+              <div class="form-text">
+                Choose the appropriate role based on the user's responsibilities.
+              </div>
+            </div>
+            <div class="alert alert-warning">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              This will immediately change the user's permissions and access level.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-2"></i>Update Role
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add User Modal (SQL-focused validation) -->
+  <div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title">
+            <i class="fas fa-user-plus me-2"></i>Add New User
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form method="POST" action="/addUser" id="addUserForm" novalidate>
+          <div class="modal-body">
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i>
+              <strong>Creating a new user account</strong><br>
+              All validation is handled by the database. Fill in the required information below.
+            </div>
+            
+            <div class="row">
+              <!-- Username with SQL constraints -->
+              <div class="col-md-6 mb-3">
+                <label for="addUsername" class="form-label fw-bold">
+                  <i class="fas fa-user me-1"></i>Username <span class="text-danger">*</span>
+                </label>
+                <input type="text" 
+                       class="form-control" 
+                       id="addUsername" 
+                       name="username" 
+                       required 
+                       minlength="3"
+                       maxlength="20"
+                       pattern="[a-zA-Z0-9_]+"
+                       placeholder="Enter username">
+                <div class="form-text">3-20 characters, letters, numbers, underscore only</div>
+              </div>
+
+              <!-- Email with SQL constraints -->
+              <div class="col-md-6 mb-3">
+                <label for="addEmail" class="form-label fw-bold">
+                  <i class="fas fa-envelope me-1"></i>Email Address <span class="text-danger">*</span>
+                </label>
+                <input type="email" 
+                       class="form-control" 
+                       id="addEmail" 
+                       name="email" 
+                       required
+                       maxlength="255"
+                       placeholder="user@example.com">
+                <div class="form-text">Must be unique and valid email format</div>
+              </div>
+
+              <!-- Password with SQL constraints -->
+              <div class="col-md-6 mb-3">
+                <label for="addPassword" class="form-label fw-bold">
+                  <i class="fas fa-lock me-1"></i>Password <span class="text-danger">*</span>
+                </label>
+                <input type="password" 
+                       class="form-control" 
+                       id="addPassword" 
+                       name="password" 
+                       required 
+                       minlength="6"
+                       maxlength="255"
+                       placeholder="Enter password">
+                <div class="form-text">Minimum 6 characters (hashed with SQL SHA1)</div>
+              </div>
+
+              <!-- Confirm Password -->
+              <div class="col-md-6 mb-3">
+                <label for="addConfirmPassword" class="form-label fw-bold">
+                  <i class="fas fa-lock me-1"></i>Confirm Password <span class="text-danger">*</span>
+                </label>
+                <input type="password" 
+                       class="form-control" 
+                       id="addConfirmPassword" 
+                       name="confirmPassword" 
+                       required 
+                       minlength="6"
+                       maxlength="255"
+                       placeholder="Confirm password">
+                <div class="form-text">Must match password (validated server-side)</div>
+              </div>
+
+              <!-- Role with SQL ENUM constraints -->
+              <div class="col-md-6 mb-3">
+                <label for="addRole" class="form-label fw-bold">
+                  <i class="fas fa-user-tag me-1"></i>User Role <span class="text-danger">*</span>
+                </label>
+                <select class="form-select" id="addRole" name="role" required>
+                  <option value="">-- Select Role --</option>
+                  <option value="customer">Customer - Basic shopping access</option>
+                  <option value="user">User - Enhanced shopping privileges</option>
+                  <option value="admin">Administrator - Full system access</option>
+                </select>
+                <div class="form-text">Role validated against database constraints</div>
+              </div>
+
+              <!-- Contact with SQL constraints -->
+              <div class="col-md-6 mb-3">
+                <label for="addContact" class="form-label fw-bold">
+                  <i class="fas fa-phone me-1"></i>Contact Number <span class="text-danger">*</span>
+                </label>
+                <input type="tel" 
+                       class="form-control" 
+                       id="addContact" 
+                       name="contact" 
+                       required 
+                       minlength="8"
+                       maxlength="15"
+                       pattern="[0-9\s\-\+\(\)]+"
+                       placeholder="Phone number">
+                <div class="form-text">8-15 characters, numbers and common phone symbols</div>
+              </div>
+
+              <!-- Address with SQL constraints -->
+              <div class="col-12 mb-3">
+                <label for="addAddress" class="form-label fw-bold">
+                  <i class="fas fa-map-marker-alt me-1"></i>Address <span class="text-danger">*</span>
+                </label>
+                <textarea class="form-control" 
+                          id="addAddress" 
+                          name="address" 
+                          rows="3" 
+                          required
+                          maxlength="255"
+                          placeholder="Complete mailing address"></textarea>
+                <div class="form-text">Maximum 255 characters as per database schema</div>
+              </div>
+            </div>
+
+            <!-- SQL Validation Info -->
+            <div class="alert alert-secondary">
+              <i class="fas fa-database me-2"></i>
+              <strong>Database Validation:</strong> All constraints are enforced by SQL including unique email/username, 
+              password hashing, and role validation. Server will return specific error messages for any violations.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="fas fa-times me-2"></i>Cancel
+            </button>
+            <button type="reset" class="btn btn-outline-secondary me-2">
+              <i class="fas fa-undo me-2"></i>Reset Form
+            </button>
+            <button type="submit" class="btn btn-success">
+              <i class="fas fa-user-plus me-2"></i>Create User (SQL Validated)
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete User Confirmation Modal -->
+  <div class="modal fade" id="deleteUserModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">
+            <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete User
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form method="POST" action="/deleteUser">
+          <div class="modal-body">
+            <div class="alert alert-danger">
+              <h6><i class="fas fa-warning me-2"></i>WARNING: This action cannot be undone!</h6>
+              <p class="mb-0">You are about to permanently delete the user account and all associated data.</p>
+            </div>
+            
+            <input type="hidden" id="deleteUserId" name="userId">
+            
+            <div class="mb-3">
+              <strong>User to delete:</strong>
+              <div class="bg-light p-3 rounded mt-2">
+                <span id="deleteUsername" class="fw-bold"></span>
+                <br>
+                <small class="text-muted">User ID: #<span id="deleteUserIdDisplay"></span></small>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Type <strong>DELETE</strong> to confirm:</label>
+              <input type="text" 
+                     class="form-control" 
+                     id="deleteConfirmText"
+                     placeholder="Type DELETE to confirm"
+                     required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="fas fa-times me-2"></i>Cancel
+            </button>
+            <button type="submit" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+              <i class="fas fa-trash me-2"></i>Delete User
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Simplified JavaScript - most validation handled by SQL
+    
+    // Set role change data
+    function setRoleChange(userId, username, currentRole) {
+      document.getElementById('roleUserId').value = userId;
+      document.getElementById('roleUsername').textContent = username;
+      document.getElementById('currentRole').textContent = currentRole;
+      document.getElementById('newRoleSelect').value = '';
+    }
+
+    // Set user data for delete modal
+    function setDeleteUser(userId, username) {
+      document.getElementById('deleteUserId').value = userId;
+      document.getElementById('deleteUsername').textContent = username;
+      document.getElementById('deleteUserIdDisplay').textContent = userId;
+      document.getElementById('deleteConfirmText').value = '';
+      document.getElementById('confirmDeleteBtn').disabled = true;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize tooltips
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+
+      // Delete confirmation text validation (keep this simple validation)
+      const deleteConfirmText = document.getElementById('deleteConfirmText');
+      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+      
+      if (deleteConfirmText && confirmDeleteBtn) {
+        deleteConfirmText.addEventListener('input', function() {
+          confirmDeleteBtn.disabled = this.value !== 'DELETE';
+        });
+      }
+
+      // Simple form submission with loading state (no complex validation)
+      const addUserForm = document.getElementById('addUserForm');
+      if (addUserForm) {
+        addUserForm.addEventListener('submit', function(e) {
+          // Let HTML5 validation run first
+          if (!this.checkValidity()) {
+            return; // HTML5 validation will show errors
+          }
+          
+          // Simple loading state
+          const submitBtn = this.querySelector('button[type="submit"]');
+          const originalText = submitBtn.innerHTML;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating User...';
+          submitBtn.disabled = true;
+          
+          // Re-enable after timeout (in case of server error)
+          setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+          }, 10000);
+        });
+      }
+
+      // Simple form reset when modal closes
+      const addUserModal = document.getElementById('addUserModal');
+      if (addUserModal) {
+        addUserModal.addEventListener('hidden.bs.modal', function() {
+          document.getElementById('addUserForm').reset();
+        });
+      }
+    });
+  </script>
+</body>
+</html>

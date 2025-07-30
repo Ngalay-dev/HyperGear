@@ -4,163 +4,239 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <title>HyperGear</title>
-  <style>
-    /* Dropdown links inside navbar */
-    .dropdown-menu a {
-      color: black !important;
-    }
-  </style>
+  <title>Shopping - HyperGear</title>
 </head>
-<body>
+<body class="bg-light">
+  <%- include('partials/navbar') %>
 
-<!-- ✅ Bootstrap navbar with centered dropdowns -->
-<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-  <div class="container-fluid">
-
-    <!-- ✅ Brand on the left -->
-    <a class="navbar-brand" href="/">HyperGear</a>
-
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="collapsibleNavbar">
-
-      <!-- ✅ CENTER: Dropdown Categories -->
-      <ul class="navbar-nav mx-auto"> <!-- mx-auto = center -->
-        <!-- Equipment -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-            Equipment
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/category/equipment/balls">Balls</a></li>
-            <li><a class="dropdown-item" href="/category/equipment/bats">Bats</a></li>
-            <li><a class="dropdown-item" href="/category/equipment/gloves">Gloves</a></li>
-          </ul>
-        </li>
-
-        <!-- Men -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-            Men
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/category/men/shirts">Shirts</a></li>
-            <li><a class="dropdown-item" href="/category/men/shorts">Shorts</a></li>
-            <li><a class="dropdown-item" href="/category/men/shoes">Shoes</a></li>
-          </ul>
-        </li>
-
-        <!-- Women -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-            Women
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/category/women/tops">Tops</a></li>
-            <li><a class="dropdown-item" href="/category/women/leggings">Leggings</a></li>
-            <li><a class="dropdown-item" href="/category/women/shoes">Shoes</a></li>
-          </ul>
-        </li>
-
-        <!-- Kids -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-            Kids
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/category/kids/boys">Boys</a></li>
-            <li><a class="dropdown-item" href="/category/kids/girls">Girls</a></li>
-          </ul>
-        </li>
-
-        <!-- Brands -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-            Brands
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/category/brands/nike">Nike</a></li>
-            <li><a class="dropdown-item" href="/category/brands/adidas">Adidas</a></li>
-            <li><a class="dropdown-item" href="/category/brands/puma">Puma</a></li>
-          </ul>
-        </li>
-      </ul>
-
-      <!-- ✅ RIGHT SIDE: Cart & Logout -->
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" href="/cart">Cart</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/logout">Logout</a>
-        </li>
-      </ul>
-
+  <div class="container-fluid my-4">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="bg-primary text-white p-4 rounded">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h2 class="mb-1">
+                <i class="fas fa-shopping-bag me-2"></i>Welcome to HyperGear, <%= user.username %>!
+              </h2>
+              <p class="mb-0 opacity-75">
+                Discover amazing sports gear and equipment
+                <span class="badge bg-light text-dark ms-2"><%= user.role %></span>
+              </p>
+            </div>
+            <div class="col-md-4 text-end">
+              <a href="/cart" class="btn btn-light btn-lg">
+                <i class="fas fa-shopping-cart me-2"></i>View Cart
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</nav>
 
-<!-- ✅ Main Content -->
-<div class="container">
-  <p>Welcome, <%= user.username %> (<%= user.role %>)</p>
-  <br>
-  <div class="text-center"><h2>Shop Now!!</h2></div>
-  <br>
+    <!-- Products Grid -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-white">
+            <div class="row align-items-center">
+              <div class="col-md-6">
+                <h4 class="mb-0">
+                  <i class="fas fa-store me-2"></i>Our Products
+                </h4>
+              </div>
+              <div class="col-md-6">
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                  </span>
+                  <input type="text" 
+                         class="form-control" 
+                         id="searchInput" 
+                         placeholder="Search products..." 
+                         onkeyup="searchProducts()">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <% if (products.length === 0) { %>
+              <!-- Empty State -->
+              <div class="text-center py-5">
+                <i class="fas fa-box-open text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-3 text-muted">No Products Available</h4>
+                <p class="text-muted">Check back later for new arrivals!</p>
+              </div>
+            <% } else { %>
+              <!-- No Results State (initially hidden) -->
+              <div id="noResults" class="text-center py-5" style="display: none;">
+                <i class="fas fa-search text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-3 text-muted">No Products Found</h4>
+                <p class="text-muted">Try adjusting your search terms</p>
+              </div>
+              
+              <!-- Products Table -->
+              <div class="table-responsive" id="productsTable">
+                <table class="table table-hover mb-0">
+                  <thead class="table-dark">
+                    <tr>
+                      <th class="px-3">
+                        <i class="fas fa-tag me-1"></i>Product
+                      </th>
+                      <th class="text-center">
+                        <i class="fas fa-image me-1"></i>Image
+                      </th>
+                      <th class="text-center">
+                        <i class="fas fa-boxes me-1"></i>Stock
+                      </th>
+                      <th class="text-center">
+                        <i class="fas fa-dollar-sign me-1"></i>Price
+                      </th>
+                      <th class="text-center">
+                        <i class="fas fa-sort-numeric-up me-1"></i>Quantity
+                      </th>
+                      <th class="text-center">
+                        <i class="fas fa-shopping-cart me-1"></i>Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="productTableBody">
+                    <% for(let i=0; i < products.length; i++) { %>
+                      <tr class="product-row" data-product-name="<%= products[i].productName.toLowerCase() %>" data-product-id="<%= products[i].idProducts %>">
+                        <!-- Product Name -->
+                        <td class="px-3 align-middle">
+                          <div class="d-flex align-items-center">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                              <i class="fas fa-box text-white"></i>
+                            </div>
+                            <div>
+                              <a href="/product/<%= products[i].idProducts %>" class="text-decoration-none fw-semibold">
+                                <%= products[i].productName %>
+                              </a>
+                              <br>
+                              <small class="text-muted">ID: #<%= products[i].idProducts %></small>
+                            </div>
+                          </div>
+                        </td>
 
-  <table class="table table-hover small text-center">
-    <thead>
-      <tr>
-        <th width="100">Product Name</th>
-        <th width="100">Product Image</th>
-        <th width="50">Branch</th>
-        <th width="50">Price</th>
-        <th width="50">Available Size</th>
-        <th width="50">Buy</th>
-        <th width="50">Save</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% for(let i=0; i < products.length; i++) { %>
-        <tr>
-          <td><a href="/product/<%= products[i].idProducts %>" ><%= products[i].productName %></a></td>
-          <td><img src="images/<%= products[i].image %>" width="20%"></td>
-          <td><%= products[i].quantity %></td>
-          <td>$<%= Number(products[i].price).toFixed(2) %></td>
+                        <!-- Product Image -->
+                        <td class="text-center align-middle">
+                          <% if (products[i].image) { %>
+                            <img src="images/<%= products[i].image %>" 
+                                 class="rounded" 
+                                 style="width: 60px; height: 60px; object-fit: cover;"
+                                 alt="<%= products[i].productName %>">
+                          <% } else { %>
+                            <div class="bg-light rounded d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                              <i class="fas fa-image text-muted"></i>
+                            </div>
+                          <% } %>
+                        </td>
 
-          <!-- Quantity Dropdown -->
-          <td>
-            <select class="form-control" onchange="document.getElementById('quantity-<%= products[i].idProducts %>').value = this.value">
-              <% for (let q = 1; q <= 5; q++) { %>
-                <option value="<%= q %>"><%= q %></option>
-              <% } %>
-            </select>
-          </td>
+                        <!-- Stock -->
+                        <td class="text-center align-middle">
+                          <% if (products[i].quantity > 10) { %>
+                            <span class="badge bg-success">
+                              <i class="fas fa-check me-1"></i><%= products[i].quantity %> Available
+                            </span>
+                          <% } else if (products[i].quantity > 0) { %>
+                            <span class="badge bg-warning text-dark">
+                              <i class="fas fa-exclamation me-1"></i><%= products[i].quantity %> Left
+                            </span>
+                          <% } else { %>
+                            <span class="badge bg-danger">
+                              <i class="fas fa-times me-1"></i>Out of Stock
+                            </span>
+                          <% } %>
+                        </td>
 
-          <!-- Buy Button -->
-          <td>
-              <form action="/add-to-cart/<%= products[i].idProducts %>" method="POST">
-                <input type="hidden" name="quantity" id="quantity-<%= products[i].idProducts %>" value="1">
-                <button type="submit" class="btn btn-primary mt-3">Buy</button>
-              </form>
-          </td>
+                        <!-- Price -->
+                        <td class="text-center align-middle">
+                          <span class="fw-bold text-success fs-5">
+                            $<%= Number(products[i].price).toFixed(2) %>
+                          </span>
+                        </td>
 
-          <!-- Save Button -->
-          <td>
-              <form action="/add-to-cart/<%= products[i].idProducts %>" method="POST">
-                <input type="hidden" name="quantity" id="quantity-<%= products[i].idProducts %>" value="1">
-                <button type="submit" class="btn btn-primary mt-3">Save</button>
-              </form>
-          </td>
+                        <!-- Quantity Selection -->
+                        <td class="text-center align-middle">
+                          <% if (products[i].quantity > 0) { %>
+                            <select class="form-select form-select-sm" 
+                                    id="quantity-<%= products[i].idProducts %>" 
+                                    style="width: 70px;">
+                              <% for (let q = 1; q <= Math.min(5, products[i].quantity); q++) { %>
+                                <option value="<%= q %>"><%= q %></option>
+                              <% } %>
+                            </select>
+                          <% } else { %>
+                            <span class="text-muted">-</span>
+                          <% } %>
+                        </td>
 
-        </tr>
-      <% } %>
-    </tbody>
-  </table>
-</div>
+                        <!-- Actions -->
+                        <td class="text-center align-middle">
+                          <% if (products[i].quantity > 0) { %>
+                            <div class="btn-group" role="group">
+                              <form action="/add-to-cart/<%= products[i].idProducts %>" method="POST" class="d-inline">
+                                <input type="hidden" name="quantity" value="1" id="hidden-quantity-<%= products[i].idProducts %>">
+                                <button type="submit" class="btn btn-primary btn-sm" onclick="updateQuantity('<%= products[i].idProducts %>')">
+                                  <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                </button>
+                              </form>
+                              <a href="/product/<%= products[i].idProducts %>" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-eye me-1"></i>View
+                              </a>
+                            </div>
+                          <% } else { %>
+                            <button class="btn btn-secondary btn-sm" disabled>
+                              <i class="fas fa-ban me-1"></i>Unavailable
+                            </button>
+                          <% } %>
+                        </td>
+                      </tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
 
+  <!-- JavaScript -->
+  <script>
+    function updateQuantity(productId) {
+      const selectedQuantity = document.getElementById('quantity-' + productId).value;
+      document.getElementById('hidden-quantity-' + productId).value = selectedQuantity;
+    }
+
+    function searchProducts() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const rows = document.querySelectorAll('.product-row');
+      let hasResults = false;
+
+      rows.forEach(row => {
+        const productName = row.getAttribute('data-product-name');
+        if (productName.includes(query)) {
+          row.style.display = '';
+          hasResults = true;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      document.getElementById('noResults').style.display = hasResults ? 'none' : '';
+    }
+
+    // Initialize tooltips if any
+    document.addEventListener('DOMContentLoaded', function() {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    });
+  </script>
 </body>
 </html>

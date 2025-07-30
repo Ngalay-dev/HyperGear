@@ -2,66 +2,237 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Your Cart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <title>Shopping Cart - HyperGear</title>
 </head>
-<body>
-    <!-- Navbar -->
-  <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="/">HyperGear App</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="collapsibleNavbar">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="/shopping">Shop</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/cart">View Cart</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/logout">Logout</a>
-          </li> 
-        </ul>
+<body class="bg-light">
+  <%- include('partials/navbar') %>
+
+  <div class="container-fluid my-4">
+    <!-- Cart Header -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="bg-primary text-white p-4 rounded">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h2 class="mb-1">
+                <i class="fas fa-shopping-cart me-2"></i>Shopping Cart
+              </h2>
+              <p class="mb-0 opacity-75">
+                Review your selected items before checkout
+              </p>
+            </div>
+            <div class="col-md-4 text-end">
+              <a href="/shopping" class="btn btn-light btn-lg">
+                <i class="fas fa-store me-2"></i>Continue Shopping
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </nav>
-  <!-- Cart Content -->
-  <div class="container">
-    <h2 class="mt-4">Shopping Cart</h2>
-    <% if (cart.length === 0) { %>
-      <p>Your cart is empty.</p>
-    <% } else { %>
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% let total = 0; %>
-          <% for (let i = 0; i < cart.length; i++) { %>
-            <tr>
-                <td><%= cart[i].productName %></td>
-                <td><img src="/images/<%= cart[i].image %>" width="80" class="img-thumbnail"></td>
-                <td><%= cart[i].quantity %></td>
-                <td>$<%= (cart[i].price * cart[i].quantity).toFixed(2) %></td>
-            </tr>
-            <% total += cart[i].price * cart[i].quantity; %>
-          <% }; %>
-        </tbody>
-      </table>
-      <h4>Total: $<%= total.toFixed(2) %></h4>
 
-      <div class="mt-4">
-        <a href="/shopping" class="btn btn-secondary">Back to Shopping</a>
+    <!-- Flash Messages -->
+    <% if (messages.error && messages.error.length > 0) { %>
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i><%= messages.error[0] %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        </div>
       </div>
     <% } %>
+    
+    <% if (messages.success && messages.success.length > 0) { %>
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i><%= messages.success[0] %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Cart Content -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-white">
+            <h4 class="mb-0">
+              <i class="fas fa-list me-2"></i>Cart Items
+              <% if (cart.length > 0) { %>
+                <span class="badge bg-primary ms-2"><%= cart.length %></span>
+              <% } %>
+            </h4>
+          </div>
+          <div class="card-body p-0">
+            <% if (cart.length === 0) { %>
+              <!-- Empty Cart State -->
+              <div class="text-center py-5">
+                <i class="fas fa-shopping-cart text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-3 text-muted">Your Cart is Empty</h4>
+                <p class="text-muted">Add some products to your cart to see them here.</p>
+                <a href="/shopping" class="btn btn-primary btn-lg">
+                  <i class="fas fa-store me-2"></i>Start Shopping
+                </a>
+              </div>
+            <% } else { %>
+              <!-- Cart Items Table -->
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-dark">
+                    <tr>
+                      <th class="px-3">
+                        <i class="fas fa-tag me-1"></i>Product
+                      </th>
+                      <th class="text-center">
+                        <i class="fas fa-image me-1"></i>Image
+                      </th>
+                      <th class="text-center">
+                        <i class="fas fa-sort-numeric-up me-1"></i>Quantity
+                      </th>
+                      <th class="text-center">
+                        <i class="fas fa-dollar-sign me-1"></i>Unit Price
+                      </th>
+                      <th class="text-center">
+                        <i class="fas fa-calculator me-1"></i>Total
+                      </th>
+                      <th class="text-center">
+                        <i class="fas fa-cog me-1"></i>Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% let grandTotal = 0; %>
+                    <% cart.forEach(item => { %>
+                      <% const itemTotal = Number(item.price) * item.quantity; %>
+                      <% grandTotal += itemTotal; %>
+                      <tr>
+                        <!-- Product Name -->
+                        <td class="px-3 align-middle">
+                          <div class="d-flex align-items-center">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                              <i class="fas fa-box text-white"></i>
+                            </div>
+                            <div>
+                              <a href="/product/<%= item.idProducts %>" class="text-decoration-none fw-semibold">
+                                <%= item.productName %>
+                              </a>
+                              <br>
+                              <small class="text-muted">ID: #<%= item.idProducts %></small>
+                            </div>
+                          </div>
+                        </td>
+
+                        <!-- Product Image -->
+                        <td class="text-center align-middle">
+                          <% if (item.image) { %>
+                            <img src="/images/<%= item.image %>" 
+                                 class="rounded" 
+                                 style="width: 80px; height: 80px; object-fit: cover;"
+                                 alt="<%= item.productName %>">
+                          <% } else { %>
+                            <div class="bg-light rounded d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                              <i class="fas fa-image text-muted"></i>
+                            </div>
+                          <% } %>
+                        </td>
+
+                        <!-- Quantity -->
+                        <td class="text-center align-middle">
+                          <span class="badge bg-info fs-6">
+                            <i class="fas fa-times me-1"></i><%= item.quantity %>
+                          </span>
+                        </td>
+
+                        <!-- Unit Price -->
+                        <td class="text-center align-middle">
+                          <span class="fw-bold text-success">
+                            $<%= Number(item.price).toFixed(2) %>
+                          </span>
+                        </td>
+
+                        <!-- Item Total -->
+                        <td class="text-center align-middle">
+                          <span class="fw-bold text-primary fs-5">
+                            $<%= itemTotal.toFixed(2) %>
+                          </span>
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="text-center align-middle">
+                          <div class="btn-group" role="group">
+                            <a href="/product/<%= item.idProducts %>" class="btn btn-outline-info btn-sm">
+                              <i class="fas fa-eye me-1"></i>View
+                            </a>
+                            <form action="/remove-from-cart/<%= item.idProducts %>" method="POST" class="d-inline">
+                              <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Remove this item from cart?')">
+                                <i class="fas fa-trash me-1"></i>Remove
+                              </button>
+                            </form>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Cart Summary -->
+              <div class="bg-light p-4 border-top">
+                <div class="row align-items-center">
+                  <div class="col-md-6">
+                    <h5 class="mb-0">
+                      <i class="fas fa-receipt me-2"></i>Cart Summary
+                    </h5>
+                    <small class="text-muted"><%= cart.length %> item(s) in your cart</small>
+                  </div>
+                  <div class="col-md-6 text-end">
+                    <h3 class="mb-0 text-success">
+                      <i class="fas fa-dollar-sign me-1"></i>Total: $<%= grandTotal.toFixed(2) %>
+                    </h3>
+                  </div>
+                </div>
+                
+                <hr class="my-3">
+                
+                <div class="d-flex justify-content-between align-items-center">
+                  <a href="/shopping" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                  </a>
+                  <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-danger btn-lg" onclick="clearCart()">
+                      <i class="fas fa-trash me-2"></i>Clear Cart
+                    </button>
+                    <a href="/checkout" class="btn btn-success btn-lg">
+                      <i class="fas fa-credit-card me-2"></i>Proceed to Checkout
+                    </a>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <script>
+    function clearCart() {
+      if (confirm('Are you sure you want to clear your entire cart? This action cannot be undone.')) {
+        // Create a form to clear the cart
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/clear-cart';
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+  </script>
 </body>
 </html>
