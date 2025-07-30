@@ -88,14 +88,10 @@ const validateRegistration = (req, res, next) => {
 };
 
 // Define routes
-app.get('/',(req,res) => {
-    const sql = 'SELECT * FROM products';
-    connection.query(sql, (error,results) => {
-        if(error) {
-            console.error('Database query error:',error.message);
-            return res.status(500).send('Error Retrieving products');
-        }
-        res.render('shopping', {products: results});
+app.get('/',  (req, res) => {
+    connection.query('SELECT * FROM products',(error, results)=>{
+        if (error) throw error;
+        res.render('shopping', {products: results} );
     });
     
 });
