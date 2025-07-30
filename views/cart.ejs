@@ -51,19 +51,22 @@
             <tr>
               <td><%= cart[i].productName %></td>
               <td><img src="/images/<%= cart[i].image %>" width="80" class="img-thumbnail"></td>
-              
-              <!-- ✅ PLUS/MINUS FORM -->
+
+              <!-- Quantity Controls -->
               <td class="text-center">
                 <div class="d-flex justify-content-center align-items-center">
-                  <!-- Minus Button -->
-                  <form action="/cart/decrease/<%= cart[i].idProducts %>" method="POST" style="display:inline;">
+                  
+                  <!-- MINUS BUTTON -->
+                  <form action="/cart/decrease/<%= cart[i].idProducts %>" method="POST" 
+                        onsubmit="return <%= cart[i].quantity === 1 ? 'confirm(\'Quantity is 1. Remove this item from the cart?\')' : 'true' %>" 
+                        style="display:inline;">
                     <button type="submit" class="btn btn-danger btn-sm">-</button>
                   </form>
 
                   <!-- Quantity Display -->
                   <span class="mx-2"><%= cart[i].quantity %></span>
 
-                  <!-- Plus Button -->
+                  <!-- PLUS BUTTON -->
                   <form action="/cart/increase/<%= cart[i].idProducts %>" method="POST" style="display:inline;">
                     <button type="submit" class="btn btn-success btn-sm">+</button>
                   </form>
