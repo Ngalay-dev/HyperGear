@@ -92,7 +92,11 @@ app.get('/', (req, res) => {
       console.error('Database query error:', error.message);
       return res.status(500).send('Error retrieving products');
     }
-    res.render('shopping', { products: results });
+//Pass results and user data to EJS
+    res.render('shopping', { 
+        products: results,
+        user: req.session.user || null
+    });
   });
 });
 
