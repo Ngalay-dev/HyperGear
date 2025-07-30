@@ -1442,7 +1442,12 @@ app.post('/checkout', checkAuthenticated, (req, res) => {
         
         const orderId = orderResult.insertId;
         
+<<<<<<< HEAD
     
+=======
+        // Since your schema uses product_variants, we need to handle this differently
+        // For now, we'll create a simplified approach that works with your current cart system
+>>>>>>> c28885b5a11b1fd39502f6a7c6509d1688e4a84e
         const itemPromises = cart.map(item => {
             return new Promise((resolve, reject) => {
                 // First, check if product has variants
