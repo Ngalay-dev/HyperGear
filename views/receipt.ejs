@@ -1,138 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
   <title>Receipt</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f6f6f6;
-      margin: 0;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background-color: #ffffff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-      text-align: center;
-      color: #333333;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    td, th {
-      padding: 10px;
-      border: 1px solid #dddddd;
-    }
-
-    th {
-      background-color: #f2f2f2;
-      text-align: left;
-    }
-
-    .total {
-      font-weight: bold;
-      background-color: #fafafa;
-    }
-
-    .center-text {
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    a.button {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 10px 20px;
-      background-color: #007BFF;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-      transition: background-color 0.3s ease;
-    }
-
-    a.button:hover {
-      background-color: #0056b3;
-    }
-
-    @media screen and (max-width: 600px) {
-      body {
-        padding: 10px;
-      }
-
-      .container {
-        padding: 15px;
-      }
-
-      table, td, th {
-        font-size: 14px;
-      }
-    }
-  </style>
 </head>
 <body>
 
-<div class="container">
-  <h2>Order Receipt</h2>
+<h2 align="center">Order Receipt</h2>
 
-  <!-- ORDER DETAILS -->
-  <table>
-    <tr>
-      <td><strong>Order ID:</strong></td>
-      <td><%= order.orderId %></td>
-    </tr>
-    <tr>
-      <td><strong>Tracking Number:</strong></td>
-      <td><%= order.trackingNumber %></td>
-    </tr>
-    <tr>
-      <td><strong>Payment Method:</strong></td>
-      <td><%= order.paymentMethod %></td>
-    </tr>
-    <% if (order.paymentMethod === 'Credit/Debit Card') { %>
-    <tr>
-      <td><strong>Card Charged:</strong></td>
-      <td><%= order.cardNumber %></td>
-    </tr>
-    <% } %>
-  </table>
+<table border="1" align="center" width="500" cellpadding="5" cellspacing="0">
+  <tr>
+    <td><strong>Order ID:</strong></td>
+    <td><%= order.orderId %></td>
+  </tr>
+  <tr>
+    <td><strong>Tracking Number:</strong></td>
+    <td><%= order.trackingNumber %></td>
+  </tr>
+  <tr>
+    <td><strong>Payment Method:</strong></td>
+    <td><%= order.paymentMethod %></td>
+  </tr>
+  <% if (order.paymentMethod === 'Credit/Debit Card') { %>
+  <tr>
+    <td><strong>Card Charged:</strong></td>
+    <td><%= order.cardNumber %></td>
+  </tr>
+  <% } %>
+</table>
 
-  <!-- ITEM LIST -->
-  <table>
-    <tr>
-      <th>Item</th>
-      <th>Qty</th>
-      <th>Price</th>
-    </tr>
-    <% order.items.forEach(item => { %>
-    <tr>
-      <td><%= item.productName %></td>
-      <td align="center"><%= item.quantity %></td>
-      <td align="right">$<%= item.price %></td>
-    </tr>
-    <% }) %>
-    <tr class="total">
-      <td colspan="2" align="right">Total Paid:</td>
-      <td align="right">$<%= order.total %></td>
-    </tr>
-  </table>
+<br>
 
-  <div class="center-text">
-    <p>Your order is being processed. Use the tracking number to check delivery status.</p>
-    <a href="/shopping" class="button">Back to Shop</a>
-  </div>
-</div>
+<!-- ITEMS LIST -->
+<table border="1" align="center" width="500" cellpadding="5" cellspacing="0">
+  <tr>
+    <th>Item</th>
+    <th>Qty</th>
+    <th>Price</th>
+  </tr>
+  <% order.items.forEach(item => { %>
+  <tr>
+    <td><%= item.productName %></td>
+    <td align="center"><%= item.quantity %></td>
+    <td align="right">$<%= item.price %></td>
+  </tr>
+  <% }) %>
+  <tr>
+    <td colspan="2" align="right"><strong>Total Paid:</strong></td>
+    <td align="right"><strong>$<%= order.total %></strong></td>
+  </tr>
+</table>
+
+<p align="center">Your order is being processed. Use the tracking number to check delivery status.</p>
+
+<p align="center"><a href="/shopping">Back to Shop</a></p>
 
 </body>
 </html>
