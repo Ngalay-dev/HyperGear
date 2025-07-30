@@ -40,12 +40,11 @@ app.use(express.urlencoded({
     extended: false
 }));
 
-//TO DO: Insert code for Session Middleware below 
+// Session Middleware
 app.use(session({
     secret: 'secret',
     resave: false,
     saveUninitialized: true,
-    // Session expires after 1 week of inactivity
     cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 } 
 }));
 
@@ -74,11 +73,9 @@ const checkAdmin = (req, res, next) => {
 // Middleware for form validation
 const validateRegistration = (req, res, next) => {
     const { username, email, password, address, contact, role } = req.body;
-
     if (!username || !email || !password || !address || !contact || !role) {
         return res.status(400).send('All fields are required.');
     }
-    
     if (password.length < 6) {
         req.flash('error', 'Password should be at least 6 or more characters long');
         req.flash('formData', req.body);
@@ -87,48 +84,36 @@ const validateRegistration = (req, res, next) => {
     next();
 };
 
-// Define routes
+// ROUTES
 app.get('/', (req, res) => {
-  const sql = 'SELECT * FROM products'; // table must exist in DB
-
+  const sql = 'SELECT * FROM products';
   connection.query(sql, (error, results) => {
     if (error) {
       console.error('Database query error:', error.message);
       return res.status(500).send('Error retrieving products');
     }
-
-    // Pass results to EJS
     res.render('shopping', { products: results });
   });
 });
 
-// Route for subcategory (e.g., /category/equipment/balls)
+// Route for subcategory
 app.get('/category/:category/:subcategory', checkAuthenticated, (req, res) => {
     const category = req.params.category;
     const subcategory = req.params.subcategory;
-    
-    // Get hierarchical categories for navbar
     connection.query('SELECT * FROM categories', (error, allCategories) => {
         if (error) throw error;
-        
-        // Structure categories for navbar
         const categories = {};
         const parents = allCategories.filter(cat => cat.parent_id === null);
-        
         parents.forEach(parent => {
             const children = allCategories.filter(cat => cat.parent_id === parent.id);
             categories[parent.name.toLowerCase()] = children;
         });
-        
         const query = 'SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE c.name = ?';
-        
         connection.query(query, [subcategory], (error, results) => {
             if (error) throw error;
-            
             results.forEach(product => {
                 product.price = Number(product.price);
             });
-            
             res.render('category', { 
                 products: results, 
                 user: req.session.user,
@@ -140,32 +125,23 @@ app.get('/category/:category/:subcategory', checkAuthenticated, (req, res) => {
     });
 });
 
-// Route for main category (e.g., /category/equipment)
+// Route for main category
 app.get('/category/:category', checkAuthenticated, (req, res) => {
     const category = req.params.category;
-    
-    // Get hierarchical categories for navbar
     connection.query('SELECT * FROM categories', (error, allCategories) => {
         if (error) throw error;
-        
-        // Structure categories for navbar
         const categories = {};
         const parents = allCategories.filter(cat => cat.parent_id === null);
-        
         parents.forEach(parent => {
             const children = allCategories.filter(cat => cat.parent_id === parent.id);
             categories[parent.name.toLowerCase()] = children;
         });
-        
         const query = 'SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id JOIN categories parent ON c.parent_id = parent.id WHERE parent.name = ?';
-        
         connection.query(query, [category], (error, results) => {
             if (error) throw error;
-            
             results.forEach(product => {
                 product.price = Number(product.price);
             });
-            
             res.render('category', { 
                 products: results, 
                 user: req.session.user,
@@ -184,8 +160,8 @@ app.get('/inventory', checkAuthenticated, checkAdmin, (req, res) => {
             return res.status(500).send('Database error');
         }
         res.render('inventory', { 
-            products: results || [],  // Ensure products is always an array
-            user: req.session.user || req.session || {} // Fallback to empty object
+            products: results || [],
+            user: req.session.user || req.session || {}
         });
     });
 });
@@ -195,14 +171,10 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', validateRegistration, (req, res) => {
-
     const { username, email, password, address, contact, role } = req.body;
-
     const sql = 'INSERT INTO users (username, email, password, address, contact, role) VALUES (?, ?, SHA1(?), ?, ?, ?)';
     connection.query(sql, [username, email, password, address, contact, role], (err, result) => {
-        if (err) {
-            throw err;
-        }
+        if (err) throw err;
         console.log(result);
         req.flash('success', 'Registration successful! Please log in.');
         res.redirect('/login');
@@ -215,21 +187,14 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
-
-    // Validate email and password
     if (!email || !password) {
         req.flash('error', 'All fields are required.');
         return res.redirect('/login');
     }
-
     const sql = 'SELECT * FROM users WHERE email = ? AND password = SHA1(?)';
     connection.query(sql, [email, password], (err, results) => {
-        if (err) {
-            throw err;
-        }
-
+        if (err) throw err;
         if (results.length > 0) {
-            // Successful login
             req.session.user = results[0]; 
             req.flash('success', 'Login successful!');
             if(req.session.user.role == 'user')
@@ -237,7 +202,6 @@ app.post('/login', (req, res) => {
             else
                 res.redirect('/inventory');
         } else {
-            // Invalid credentials
             req.flash('error', 'Invalid email or password.');
             res.redirect('/login');
         }
@@ -245,29 +209,22 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/shopping', checkAuthenticated, (req, res) => {
-    // Fetch data from MySQL
     connection.query('SELECT * FROM products', (error, results) => {
         if (error) throw error;
         res.render('shopping', { user: req.session.user, products: results });
-      });
+    });
 });
 
 app.post('/add-to-cart/:id', checkAuthenticated, (req, res) => {
     const productId = parseInt(req.params.id);
     const quantity = parseInt(req.body.quantity) || 1;
-
     connection.query('SELECT * FROM products WHERE idProducts = ?', [productId], (error, results) => {
         if (error) throw error;
-
         if (results.length > 0) {
             const product = results[0];
-
-            // Initialize cart in session if not exists
             if (!req.session.cart) {
                 req.session.cart = [];
             }
-
-            // Check if product already in cart
             const existingItem = req.session.cart.find(item => item.idProducts === productId);
             if (existingItem) {
                 existingItem.quantity += quantity;
@@ -280,7 +237,6 @@ app.post('/add-to-cart/:id', checkAuthenticated, (req, res) => {
                     image: product.image
                 });
             }
-
             res.redirect('/cart');
         } else {
             res.status(404).send("Product not found");
@@ -292,6 +248,30 @@ app.get('/cart', checkAuthenticated, (req, res) => {
     const cart = req.session.cart || [];
     res.render('cart', { cart, user: req.session.user });
 });
+
+
+// ✅ ✅ ✅ NEW ROUTES FOR PLUS/MINUS BUTTONS
+app.post('/cart/increase/:id', checkAuthenticated, (req, res) => {
+    const productId = parseInt(req.params.id);
+    if (!req.session.cart) return res.redirect('/cart');
+    const item = req.session.cart.find(p => p.idProducts === productId);
+    if (item) {
+        item.quantity += 1;
+    }
+    res.redirect('/cart');
+});
+
+app.post('/cart/decrease/:id', checkAuthenticated, (req, res) => {
+    const productId = parseInt(req.params.id);
+    if (!req.session.cart) return res.redirect('/cart');
+    const item = req.session.cart.find(p => p.idProducts === productId);
+    if (item) {
+        item.quantity = item.quantity > 1 ? item.quantity - 1 : 1;
+    }
+    res.redirect('/cart');
+});
+// ✅ ✅ ✅ END PLUS/MINUS
+
 
 app.get('/logout', (req, res) => {
     req.session.destroy();
@@ -322,7 +302,6 @@ app.post('/addProduct', upload.single('image'),  (req, res) => {
     } else {
         image = null;
     }
-
     const sql = 'INSERT INTO products (productName, quantity, price, image, category_id) VALUES (?, ?, ?, ?, ?)';
     connection.query(sql , [name, quantity, price, image, 1], (error, results) => {
         if (error) {
@@ -378,7 +357,7 @@ app.get('/deleteProduct/:id', (req, res) => {
 });
 
 
-// ✅ ✅ ✅  CHECKOUT ROUTES ADDED HERE
+// ✅ ✅ ✅  CHECKOUT ROUTES
 app.get('/checkout', checkAuthenticated, (req, res) => {
     const cart = req.session.cart || [];
     if (cart.length === 0) {
@@ -427,4 +406,3 @@ app.get('/receipt', checkAuthenticated, (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
