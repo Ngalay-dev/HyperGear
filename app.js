@@ -103,7 +103,11 @@ app.get('/', (req, res) => {
 // Route for subcategory
 app.get('/category/:category/:subcategory', checkAuthenticated, (req, res) => {
     const category = req.params.category;
-    const subcategory = req.params.subcategory;
+    let subcategory = req.params.subcategory;
+    
+    // Convert URL format back to database format
+    subcategory = subcategory.replace(/-/g, ' '); // "Casual-Shoes" → "Casual Shoes"
+    
     connection.query('SELECT * FROM categories', (error, allCategories) => {
         if (error) throw error;
         const categories = {};
