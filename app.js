@@ -293,19 +293,12 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/product/:id', checkAuthenticated, (req, res) => {
-  // Extract the product ID from the request parameters
   const productId = req.params.id;
-
-  // Fetch data from MySQL based on the product ID
   connection.query('SELECT * FROM products WHERE idProducts = ?', [productId], (error, results) => {
       if (error) throw error;
-
-      // Check if any product with the given ID was found
       if (results.length > 0) {
-          // Render HTML page with the product data
           res.render('product', { product: results[0], user: req.session.user  });
       } else {
-          // If no product with the given ID was found, render a 404 page or handle it accordingly
           res.status(404).send('Product not found');
       }
   });
@@ -316,24 +309,20 @@ app.get('/addProduct', checkAuthenticated, checkAdmin, (req, res) => {
 });
 
 app.post('/addProduct', upload.single('image'),  (req, res) => {
-    // Extract product data from the request body
     const { name, quantity, price} = req.body;
     let image;
     if (req.file) {
-        image = req.file.filename; // Save only the filename
+        image = req.file.filename;
     } else {
         image = null;
     }
 
     const sql = 'INSERT INTO products (productName, quantity, price, image, category_id) VALUES (?, ?, ?, ?, ?)';
-    // Insert the new product into the database
     connection.query(sql , [name, quantity, price, image, 1], (error, results) => {
         if (error) {
-            // Handle any error that occurs during the database operation
             console.error("Error adding product:", error);
             res.status(500).send('Error adding product');
         } else {
-            // Send a success response
             res.redirect('/inventory');
         }
     });
@@ -342,17 +331,11 @@ app.post('/addProduct', upload.single('image'),  (req, res) => {
 app.get('/updateProduct/:id',checkAuthenticated, checkAdmin, (req,res) => {
     const productId = req.params.id;
     const sql = 'SELECT * FROM products WHERE idProducts = ?';
-
-    // Fetch data from MySQL based on the product ID
     connection.query(sql , [productId], (error, results) => {
         if (error) throw error;
-
-        // Check if any product with the given ID was found
         if (results.length > 0) {
-            // Render HTML page with the product data
             res.render('updateProduct', { product: results[0] });
         } else {
-            // If no product with the given ID was found, render a 404 page or handle it accordingly
             res.status(404).send('Product not found');
         }
     });
@@ -360,22 +343,17 @@ app.get('/updateProduct/:id',checkAuthenticated, checkAdmin, (req,res) => {
 
 app.post('/updateProduct/:id', upload.single('image'), (req, res) => {
     const productId = req.params.id;
-    // Extract product data from the request body
     const { name, quantity, price } = req.body;
-    let image  = req.body.currentImage; //retrieve current image filename
-    if (req.file) { //if new image is uploaded
-        image = req.file.filename; // set image to be new image filename
+    let image  = req.body.currentImage;
+    if (req.file) {
+        image = req.file.filename;
     } 
-
     const sql = 'UPDATE products SET productName = ? , quantity = ?, price = ?, image =? WHERE idProducts = ?';
-    // Insert the new product into the database
     connection.query(sql, [name, quantity, price, image, productId], (error, results) => {
         if (error) {
-            // Handle any error that occurs during the database operation
             console.error("Error updating product:", error);
             res.status(500).send('Error updating product');
         } else {
-            // Send a success response
             res.redirect('/inventory');
         }
     });
@@ -383,18 +361,64 @@ app.post('/updateProduct/:id', upload.single('image'), (req, res) => {
 
 app.get('/deleteProduct/:id', (req, res) => {
     const productId = req.params.id;
-
     connection.query('DELETE FROM products WHERE idProducts = ?', [productId], (error, results) => {
         if (error) {
-            // Handle any error that occurs during the database operation
             console.error("Error deleting product:", error);
             res.status(500).send('Error deleting product');
         } else {
-            // Send a success response
             res.redirect('/inventory');
         }
     });
 });
 
+
+// ✅ ✅ ✅  CHECKOUT ROUTES ADDED HERE
+app.get('/checkout', checkAuthenticated, (req, res) => {
+    const cart = req.session.cart || [];
+    if (cart.length === 0) {
+        req.flash('error', 'Your cart is empty.');
+        return res.redirect('/cart');
+    }
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    res.render('checkout', { cart, total, user: req.session.user });
+});
+
+app.post('/checkout', checkAuthenticated, (req, res) => {
+    const { paymentMethod, cardNumber, expiry, cvv } = req.body;
+    const cart = req.session.cart || [];
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    if (paymentMethod === 'Credit/Debit Card') {
+        if (!cardNumber || !expiry || !cvv) {
+            req.flash('error', 'Please fill in all credit card details.');
+            return res.redirect('/checkout');
+        }
+    }
+
+    const orderId = 'ORD' + Date.now();
+    const trackingNumber = 'TRK' + Math.floor(Math.random() * 1000000);
+
+    req.session.lastOrder = {
+        orderId,
+        trackingNumber,
+        total,
+        paymentMethod,
+        items: cart,
+        cardNumber: paymentMethod === 'Credit/Debit Card' ? '**** **** **** ' + cardNumber.slice(-4) : null
+    };
+
+    req.session.cart = [];
+    res.redirect('/receipt');
+});
+
+app.get('/receipt', checkAuthenticated, (req, res) => {
+    const order = req.session.lastOrder;
+    if (!order) {
+        return res.redirect('/shopping');
+    }
+    res.render('receipt', { order, user: req.session.user });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
