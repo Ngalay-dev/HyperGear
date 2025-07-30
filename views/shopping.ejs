@@ -120,7 +120,6 @@
         <th width="50">Price</th>
         <th width="50">Available Size</th>
         <th width="50">Buy</th>
-        <th width="50">Save</th>
       </tr>
     </thead>
     <tbody>
@@ -152,7 +151,7 @@
           <td>
               <form action="/add-to-cart/<%= products[i].idProducts %>" method="POST">
                 <input type="hidden" name="quantity" id="quantity-<%= products[i].idProducts %>" value="1">
-                <button type="submit" class="btn btn-primary mt-3">Save</button>
+                <button type="submit" class="btn btn-primary mt-3">Add to Cart</button>
               </form>
           </td>
 
