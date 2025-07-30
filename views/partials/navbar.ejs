@@ -17,8 +17,8 @@
             <ul class="dropdown-menu" aria-labelledby="<%= main %>Dropdown">
               <% categories[main].forEach(sub => { %>
                 <li>
-                  <a class="dropdown-item" href="/category/<%= main %>/<%= sub.name %>">
-                    <%= sub.name %>
+                  <a class="dropdown-item" href="/category/<%= main.toLowerCase() %>/<%= sub.name.toLowerCase().replace(/\s+/g, '-') %>">
+                      <%= sub.name %>
                   </a>
                 </li>
               <% }) %>
