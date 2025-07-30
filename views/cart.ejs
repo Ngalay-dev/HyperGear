@@ -42,6 +42,7 @@
             <th>Image</th>
             <th>Quantity</th>
             <th>Total</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -50,8 +51,19 @@
             <tr>
                 <td><%= cart[i].productName %></td>
                 <td><img src="/images/<%= cart[i].image %>" width="80" class="img-thumbnail"></td>
-                <td><%= cart[i].quantity %></td>
+                
+                <!-- ✅ Quantity Update Form -->
+                <td>
+                  <form action="/cart/update/<%= cart[i].idProducts %>" method="POST" class="d-flex">
+                    <input type="number" name="quantity" value="<%= cart[i].quantity %>" min="1" class="form-control me-2" style="width: 80px;">
+                    <button type="submit" class="btn btn-warning btn-sm">Update</button>
+                  </form>
+                </td>
+
                 <td>$<%= (cart[i].price * cart[i].quantity).toFixed(2) %></td>
+                <td>
+                  <!-- Optional: Future remove button -->
+                </td>
             </tr>
             <% total += cart[i].price * cart[i].quantity; %>
           <% }; %>
